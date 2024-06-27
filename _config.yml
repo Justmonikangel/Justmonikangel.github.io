@@ -1,10 +1,10 @@
 # Site settings
 title: 戲作三昧
-SEOTitle: 柏荧的博客 | BY Blog
+SEOTitle: 您是来访的第n颗行星
 header-img: img/post-bg-desk.jpg
 email: jolynepan@gmail.com
-description: 质地很疯狂
-keyword: "BY, BY Blog, 柏荧的博客, qiubaiying, 邱柏荧, iOS, Apple, iPhone"
+description: 女士，我也只想在街上踱步，从解开的马甲兜里掏出笔来写两句讥讽的斧头，劈向心中的大海。
+keyword: "对人类的全部苦难下跪"
 url: "http://justmonikangel.github.io"          # your host, for absolute URL
 baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
 github_repo: "https://github.com/qiubaiying/qiubaiying.github.io.git" # you code repository
@@ -18,12 +18,12 @@ sidebar-avatar: /img/about-BY-gentle.jpg      # use absolute URL, seeing it's us
 
 # SNS settings
 RSS: false
-# weibo_username:     qiubaiying
-zhihu_username:     qiubaiying
-github_username:    qiubaiying
-facebook_username:  baiying.qiu.7
-jianshu_username:   e71990ada2fd
-#twitter_username:   qiubaiying
+# weibo_username:    
+zhihu_username:     
+github_username:   justmonikangel
+facebook_username:  
+jianshu_username:   
+#twitter_username:   
 
 
 
