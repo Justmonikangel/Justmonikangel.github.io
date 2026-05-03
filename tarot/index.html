@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarot · 抓取占卜</title>
+<link rel="stylesheet" href="css/tarot.css">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Noto+Serif+SC:wght@300;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<header class="topbar">
+  <h1 class="title">THE COSMIC TAROT</h1>
+  <div class="controls">
+    <label class="ctrl">
+      <span>牌组</span>
+      <select id="deck-select">
+        <option value="prism-color">棱镜·彩</option>
+        <option value="prism-mono">棱镜·黑白</option>
+        <option value="sorceress">Sorceress</option>
+      </select>
+    </label>
+    <label class="ctrl">
+      <span>牌阵</span>
+      <select id="spread-select">
+        <option value="three-card">三张牌（过去·现在·未来）</option>
+        <option value="celtic-cross">凯尔特十字</option>
+        <option value="relationship">关系五星</option>
+      </select>
+    </label>
+    <label class="ctrl file">
+      <span>导入牌阵</span>
+      <input type="file" id="spread-import" accept="application/json">
+    </label>
+    <label class="ctrl toggle">
+      <input type="checkbox" id="hand-toggle">
+      <span>启用手势</span>
+    </label>
+    <button id="reset-btn" class="ctrl btn">重新洗牌</button>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <section class="deck-pile" id="deck-pile" aria-label="牌堆">
+    <div class="pile-hint">把手伸到镜头前，张开 → 合拢 抓一张牌</div>
+  </section>
+
+  <section class="spread-board" id="spread-board" aria-label="牌阵"></section>
+
+  <aside class="reading" id="reading" aria-live="polite">
+    <h2>解读</h2>
+    <div class="reading-body">
+      <p class="reading-empty">摆完所有位置后，这里会给你一段酒友风的串讲。</p>
+    </div>
+  </aside>
+</main>
+
+<div class="hand-overlay" id="hand-overlay" hidden>
+  <video id="hand-video" autoplay playsinline muted></video>
+  <canvas id="hand-canvas"></canvas>
+  <div class="hand-status" id="hand-status">摄像头加载中…</div>
+</div>
+
+<div class="cursor" id="hand-cursor" hidden></div>
+
+<footer class="hint">
+  <span>提示：未启用手势时，可用鼠标拖拽牌到位置上。</span>
+</footer>
+
+<script src="js/cards.js"></script>
+<script src="js/spreads.js"></script>
+<script src="js/readings.js"></script>
+<script src="js/hand-tracker.js"></script>
+<script src="js/tarot.js"></script>
+</body>
+</html>
