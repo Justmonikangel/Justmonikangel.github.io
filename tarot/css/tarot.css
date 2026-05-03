@@ -109,6 +109,51 @@ html, body {
   opacity: 0.75;
 }
 
+.pile-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 60;
+  background: rgba(10,4,32,0.55);
+  backdrop-filter: blur(2px);
+  border-radius: 12px;
+}
+.pile-overlay .stage-label {
+  font-family: "Cinzel", serif;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(217,184,107,0.4);
+}
+.pile-overlay .stage-sub {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--gold-soft);
+  opacity: 0.85;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.6;
+}
+.pile-overlay button {
+  background: transparent;
+  border: 1px solid var(--gold-soft);
+  color: var(--gold);
+  font-family: inherit;
+  letter-spacing: 0.2em;
+  font-size: 11px;
+  padding: 6px 16px;
+  cursor: pointer;
+  border-radius: 3px;
+  margin-top: 6px;
+}
+.pile-overlay button:hover { background: var(--gold-soft); color: var(--bg-deep); }
+
+.card.shuffling { transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), left 0.45s cubic-bezier(0.4, 0, 0.2, 1), top 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+
 .spread-board {
   position: relative;
   border: 1px solid rgba(217,184,107,0.25);
@@ -215,6 +260,19 @@ html, body {
   font-size: 56px;
   filter: drop-shadow(0 0 8px rgba(217,184,107,0.4));
 }
+/* If a real card image is present it covers the placeholder art beneath it. */
+.card-front .card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--card-radius);
+  z-index: 2;
+}
+.card-front .card-img + .card-num,
+.card-front .card-img ~ .card-art,
+.card-front .card-img ~ .card-name { display: none; }
 .card-front .card-name {
   font-family: "Cinzel", serif;
   font-size: 11px;

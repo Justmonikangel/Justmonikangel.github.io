@@ -66,9 +66,138 @@
     placed = [];
     cardEls.forEach(c => c.remove());
     cardEls = [];
+    clearPileOverlay();
     deckQueue = shuffle(window.TAROT_DECK).slice(0, currentSpread.positions.length + 6);
     renderPile();
     renderReading();
+    runShuffleThenCut();
+  }
+
+  function clearPileOverlay() {
+    const old = deckPile.querySelector(".pile-overlay");
+    if (old) old.remove();
+  }
+
+  function showPileOverlay({ label, sub, buttonText, onButton }) {
+    clearPileOverlay();
+    const ov = document.createElement("div");
+    ov.className = "pile-overlay";
+    ov.innerHTML = `
+      <div class="stage-label">${label}</div>
+      <div class="stage-sub">${sub}</div>
+      ${buttonText ? `<button>${buttonText}</button>` : ""}
+    `;
+    if (buttonText) ov.querySelector("button").addEventListener("click", onButton);
+    deckPile.appendChild(ov);
+    return ov;
+  }
+
+  async function runShuffleThenCut() {
+    showPileOverlay({ label: "SHUFFLING", sub: "心里默想你的问题，让牌组在掌心翻动几次。" });
+    await animateShuffle();
+    await new Promise(r => setTimeout(r, 200));
+    await runCutStep();
+    clearPileOverlay();
+  }
+
+  function animateShuffle() {
+    return new Promise(resolve => {
+      cardEls.forEach(c => c.classList.add("shuffling"));
+      const pileRect = deckPile.getBoundingClientRect();
+      const cx = pileRect.left + pileRect.width / 2;
+      const cy = pileRect.top + pileRect.height / 2;
+      let pass = 0;
+      const total = 3;
+      const step = () => {
+        if (pass >= total) {
+          // restack
+          cardEls.forEach((el, i) => {
+            const offset = (i - cardEls.length / 2) * 1.5;
+            el.style.left = (cx - 65 + offset) + "px";
+            el.style.top  = (cy - 110 - i * 0.5) + "px";
+            el.style.transform = `rotate(${offset * 0.4}deg)`;
+            el.style.zIndex = 10 + i;
+          });
+          setTimeout(() => {
+            cardEls.forEach(c => c.classList.remove("shuffling"));
+            resolve();
+          }, 500);
+          return;
+        }
+        // fan / scatter
+        cardEls.forEach((el, i) => {
+          const angle = (Math.random() - 0.5) * Math.PI;
+          const r = 60 + Math.random() * 70;
+          el.style.left = (cx - 65 + Math.cos(angle) * r) + "px";
+          el.style.top  = (cy - 110 + Math.sin(angle) * r * 0.4) + "px";
+          el.style.transform = `rotate(${(Math.random() - 0.5) * 30}deg)`;
+          el.style.zIndex = 10 + Math.floor(Math.random() * cardEls.length);
+        });
+        pass++;
+        setTimeout(step, 480);
+      };
+      step();
+    });
+  }
+
+  function runCutStep() {
+    return new Promise(resolve => {
+      let onClick;
+      const finish = () => {
+        deckPile.removeEventListener("click", onClick);
+        resolve();
+      };
+      showPileOverlay({
+        label: "CUT THE DECK",
+        sub: "在牌堆任一位置点一下来切牌；或跳过。",
+        buttonText: "跳过切牌",
+        onButton: finish,
+      });
+      onClick = e => {
+        if (e.target.closest("button")) return;
+        const r = deckPile.getBoundingClientRect();
+        const ratio = (e.clientY - r.top) / r.height;
+        const cutAt = Math.max(1, Math.min(deckQueue.length - 1, Math.round(deckQueue.length * ratio)));
+        deckQueue = [...deckQueue.slice(cutAt), ...deckQueue.slice(0, cutAt)];
+        deckPile.removeEventListener("click", onClick);
+        animateCut(cutAt).then(resolve);
+      };
+      deckPile.addEventListener("click", onClick);
+    });
+  }
+
+  function animateCut(cutAt) {
+    return new Promise(resolve => {
+      const pileRect = deckPile.getBoundingClientRect();
+      const cx = pileRect.left + pileRect.width / 2;
+      const cy = pileRect.top + pileRect.height / 2;
+      cardEls.forEach((el, i) => {
+        el.classList.add("shuffling");
+        if (i >= cutAt) {
+          el.style.left = (cx - 65 + 90) + "px";
+          el.style.transform = "rotate(8deg)";
+        } else {
+          el.style.left = (cx - 65 - 90) + "px";
+          el.style.transform = "rotate(-8deg)";
+        }
+      });
+      setTimeout(() => {
+        // restack in new order
+        const newOrder = [...cardEls.slice(cutAt), ...cardEls.slice(0, cutAt)];
+        cardEls = newOrder;
+        cardEls.forEach((el, i) => {
+          const offset = (i - cardEls.length / 2) * 1.5;
+          el.style.left = (cx - 65 + offset) + "px";
+          el.style.top  = (cy - 110 - i * 0.5) + "px";
+          el.style.transform = `rotate(${offset * 0.4}deg)`;
+          el.style.zIndex = 10 + i;
+        });
+        setTimeout(() => {
+          cardEls.forEach(c => c.classList.remove("shuffling"));
+          resolve();
+        }, 500);
+      }, 500);
+    });
   }
 
   function renderPile() {
@@ -92,10 +221,13 @@
   function makeCardEl(card) {
     const el = document.createElement("div");
     el.className = "card";
+    const deckId = document.body.dataset.deck || "prism-color";
+    const imgUrl = `decks/${deckId}/${card.id}.jpg`;
     el.innerHTML = `
       <div class="card-inner">
         <div class="card-face card-back"></div>
         <div class="card-face card-front">
+          <img class="card-img" src="${imgUrl}" alt="${card.cn}" onerror="this.remove()">
           <div class="card-num">${card.num}</div>
           <div class="card-art">${card.glyph || "✦"}</div>
           <div class="card-name">${card.cn}<br><span style="font-size:9px;opacity:0.7">${card.name}</span></div>
