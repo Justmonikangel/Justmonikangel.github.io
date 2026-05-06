@@ -1,0 +1,451 @@
+:root {
+  --bg-deep: #0a0420;
+  --bg-mid: #1a0d3d;
+  --gold: #d9b86b;
+  --gold-soft: #b89653;
+  --ink: #f4ecd8;
+  --violet: #6b3fa0;
+  --rose: #c97b9c;
+  --card-w: 130px;
+  --card-h: 220px;
+  --card-radius: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: "Noto Serif SC", "Cinzel", serif;
+  color: var(--ink);
+  background: radial-gradient(ellipse at top, #2a155c 0%, var(--bg-deep) 55%, #03010d 100%);
+  overflow: hidden;
+}
+
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ------ topbar ------ */
+.topbar {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  background: linear-gradient(to bottom, rgba(10,4,32,0.85), transparent);
+  backdrop-filter: blur(4px);
+}
+.title {
+  font-family: "Cinzel", serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.45em;
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(217,184,107,0.35);
+}
+.controls { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.ctrl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+.ctrl > span { opacity: 0.85; }
+.ctrl select, .ctrl input[type="file"], .ctrl.btn {
+  background: rgba(20,8,52,0.7);
+  border: 1px solid var(--gold-soft);
+  color: var(--ink);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ctrl.btn { padding: 7px 14px; }
+.ctrl.btn:hover { background: var(--gold-soft); color: var(--bg-deep); }
+.ctrl.toggle { cursor: pointer; }
+.ctrl.toggle input { accent-color: var(--gold); }
+.ctrl.file input { font-size: 10px; max-width: 160px; }
+
+/* ------ stage ------ */
+.stage {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 320px 1fr 340px;
+  gap: 16px;
+  padding: 12px 24px 24px;
+  height: calc(100vh - 96px);
+}
+
+.deck-pile {
+  position: relative;
+  border: 1px solid rgba(217,184,107,0.25);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(107,63,160,0.25), transparent 60%),
+    rgba(10,4,32,0.45);
+  padding: 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pile-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--gold-soft);
+  text-align: center;
+  width: 90%;
+  opacity: 0.75;
+}
+
+.pile-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 60;
+  background: rgba(10,4,32,0.55);
+  backdrop-filter: blur(2px);
+  border-radius: 12px;
+}
+.pile-overlay .stage-label {
+  font-family: "Cinzel", serif;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(217,184,107,0.4);
+}
+.pile-overlay .stage-sub {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--gold-soft);
+  opacity: 0.85;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.6;
+}
+.pile-overlay button {
+  background: transparent;
+  border: 1px solid var(--gold-soft);
+  color: var(--gold);
+  font-family: inherit;
+  letter-spacing: 0.2em;
+  font-size: 11px;
+  padding: 6px 16px;
+  cursor: pointer;
+  border-radius: 3px;
+  margin-top: 6px;
+}
+.pile-overlay button:hover { background: var(--gold-soft); color: var(--bg-deep); }
+
+.card.shuffling { transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), left 0.45s cubic-bezier(0.4, 0, 0.2, 1), top 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
+
+.spread-board {
+  position: relative;
+  border: 1px solid rgba(217,184,107,0.25);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(201,123,156,0.08), transparent 70%),
+    rgba(10,4,32,0.35);
+  overflow: hidden;
+}
+
+.reading {
+  border: 1px solid rgba(217,184,107,0.25);
+  border-radius: 12px;
+  background: rgba(10,4,32,0.55);
+  padding: 18px 20px;
+  overflow-y: auto;
+}
+.reading h2 {
+  font-family: "Cinzel", serif;
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(217,184,107,0.2);
+  padding-bottom: 8px;
+}
+.reading-body p { font-size: 14px; line-height: 1.85; margin-bottom: 14px; }
+.reading-body .pos-label {
+  font-family: "Cinzel", serif;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  font-size: 11px;
+  margin-bottom: 4px;
+  display: block;
+}
+.reading-body .pos-card {
+  color: var(--rose);
+  font-size: 13px;
+  font-weight: 500;
+}
+.reading-body .narrative {
+  border-top: 1px dashed rgba(217,184,107,0.25);
+  margin-top: 14px;
+  padding-top: 14px;
+  color: #fff5dd;
+  font-size: 14.5px;
+  line-height: 1.95;
+}
+.reading-empty { opacity: 0.5; font-style: italic; font-size: 13px; }
+
+/* ------ cards ------ */
+.card {
+  position: absolute;
+  width: var(--card-w);
+  height: var(--card-h);
+  border-radius: var(--card-radius);
+  cursor: grab;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 0.3s;
+  transform-style: preserve-3d;
+  user-select: none;
+  will-change: transform, left, top;
+}
+.card.dragging { cursor: grabbing; transition: none; z-index: 100; }
+.card.placed { cursor: default; }
+.card.glow { box-shadow: 0 0 30px rgba(217,184,107,0.6), 0 0 60px rgba(201,123,156,0.4); }
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.6, 0, 0.3, 1);
+}
+.card.flipped .card-inner { transform: rotateY(180deg); }
+.card.reversed.flipped .card-inner { transform: rotateY(180deg) rotateZ(180deg); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 1.5px solid var(--gold-soft);
+  overflow: hidden;
+}
+.card-back { background-image: var(--back-img, none); background-size: cover; background-position: center; }
+.card-front {
+  transform: rotateY(180deg);
+  background: var(--front-bg);
+  color: var(--front-ink, var(--ink));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px;
+  text-align: center;
+}
+.card-front .card-art {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  filter: drop-shadow(0 0 8px rgba(217,184,107,0.4));
+}
+/* If a real card image is present it covers the placeholder art beneath it. */
+.card-front .card-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--card-radius);
+  z-index: 2;
+}
+.card-front .card-img + .card-num,
+.card-front .card-img ~ .card-art,
+.card-front .card-img ~ .card-name { display: none; }
+.card-front .card-name {
+  font-family: "Cinzel", serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  border-top: 1px solid currentColor;
+  padding-top: 6px;
+  width: 80%;
+}
+.card-front .card-num {
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+}
+
+/* ------ deck themes (procedural placeholders) ------ */
+body[data-deck="prism-color"] {
+  --back-img: linear-gradient(135deg, #6b3fa0 0%, #c97b9c 35%, #d9b86b 70%, #4a86c5 100%);
+  --front-bg: linear-gradient(160deg, #1a0d3d 0%, #3a1a6e 100%);
+  --front-ink: #f4ecd8;
+}
+body[data-deck="prism-color"] .card-back {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,0.06) 8px 9px),
+    var(--back-img);
+}
+body[data-deck="prism-color"] .card-front {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(201,123,156,0.5), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(74,134,197,0.5), transparent 50%),
+    var(--front-bg);
+}
+
+body[data-deck="prism-mono"] {
+  --back-img: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 50%, #0a0a0a 100%);
+  --front-bg: #f4ecd8;
+  --front-ink: #1a0d3d;
+}
+body[data-deck="prism-mono"] .card-back {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 6px, rgba(255,255,255,0.08) 6px 7px),
+    repeating-linear-gradient(90deg, transparent 0 6px, rgba(255,255,255,0.04) 6px 7px),
+    var(--back-img);
+}
+body[data-deck="prism-mono"] .card-front {
+  background: var(--front-bg);
+  color: var(--front-ink);
+}
+body[data-deck="prism-mono"] .card-front .card-art { filter: none; color: #1a0d3d; }
+
+body[data-deck="sorceress"] {
+  --back-img: radial-gradient(circle at 50% 40%, #6b3fa0 0%, #2a155c 60%, #0a0420 100%);
+  --front-bg: linear-gradient(180deg, #1a0d3d 0%, #4a1d5e 100%);
+  --front-ink: #f4ecd8;
+}
+body[data-deck="sorceress"] .card-back {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(217,184,107,0.4), transparent 30%),
+    var(--back-img);
+}
+body[data-deck="sorceress"] .card-back::before {
+  content: "☾";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  color: rgba(217,184,107,0.6);
+}
+
+/* slot positions */
+.slot {
+  position: absolute;
+  width: var(--card-w);
+  height: var(--card-h);
+  border: 1.5px dashed rgba(217,184,107,0.35);
+  border-radius: var(--card-radius);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--gold-soft);
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.slot.target { border-color: var(--gold); background: rgba(217,184,107,0.1); }
+.slot.filled { border-style: solid; opacity: 0.4; }
+.slot .slot-label {
+  position: absolute;
+  bottom: -22px;
+  width: 140%;
+  left: -20%;
+  font-family: "Cinzel", serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+
+/* ------ hand overlay ------ */
+.hand-overlay {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 220px;
+  height: 165px;
+  border: 1px solid var(--gold-soft);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 10;
+  background: #000;
+}
+.hand-overlay video, .hand-overlay canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+}
+.hand-status {
+  position: absolute;
+  bottom: 4px;
+  left: 6px;
+  font-size: 10px;
+  color: var(--gold);
+  text-shadow: 0 0 4px #000;
+  letter-spacing: 0.15em;
+  z-index: 2;
+}
+
+/* ------ cursor ------ */
+.cursor {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+  transform: translate(-50%, -50%);
+  transition: width 0.12s, height 0.12s, background 0.12s;
+  box-shadow: 0 0 12px rgba(217,184,107,0.6);
+}
+.cursor.grabbing {
+  width: 22px;
+  height: 22px;
+  background: rgba(217,184,107,0.4);
+}
+
+/* ------ footer ------ */
+.hint {
+  position: fixed;
+  bottom: 6px;
+  left: 24px;
+  font-size: 11px;
+  color: var(--gold-soft);
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+  z-index: 5;
+}
+
+@media (max-width: 1100px) {
+  .stage { grid-template-columns: 220px 1fr 280px; }
+  :root { --card-w: 100px; --card-h: 170px; }
+}
+@media (max-width: 800px) {
+  .stage {
+    grid-template-columns: 1fr;
+    grid-template-rows: 160px 1fr 240px;
+    height: auto;
+    overflow-y: auto;
+  }
+  .deck-pile { height: 160px; }
+}
