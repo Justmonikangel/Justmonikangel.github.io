@@ -33,3 +33,33 @@ Temporary Items
 
 # debug file
 _site
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.local
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Backend data (large bioinformatics artifacts — never commit)
+backend/data/
+backend/.celery/
+backend/.cache/
+backend/models/
+*.fasta
+*.faa
+*.fna
+*.pdb
+*.cif
+*.npy
+*.faiss
+*.bin
+
+# Local secrets
+backend/.env

@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bact
+      POSTGRES_PASSWORD: bact
+      POSTGRES_DB: bact
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bact"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    env_file: .env
+    environment:
+      POSTGRES_DSN: postgresql+psycopg://bact:bact@postgres:5432/bact
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - bactdata:/data
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+    command: ["bash", "/app/docker/entrypoint-api.sh"]
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    env_file: .env
+    environment:
+      POSTGRES_DSN: postgresql+psycopg://bact:bact@postgres:5432/bact
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - bactdata:/data
+
+  flower:
+    image: mher/flower:2.0
+    command: ["celery", "--broker=redis://redis:6379/1", "flower", "--port=5555"]
+    depends_on:
+      - redis
+    ports:
+      - "5555:5555"
+
+volumes:
+  pgdata:
+  bactdata:
