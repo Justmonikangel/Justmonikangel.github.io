@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Smart Split — Prototype Presentation (BEX5413)</title>
+  <meta name="description" content="Smart Split prototype presentation. A market-first, meaning-aware walkthrough using Verganti's design-driven innovation and Balfour's Four Fits framework." />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme" />
+
+  <style>
+    :root {
+      --navy: #14213d;
+      --navy-2: #1f2f55;
+      --ink: #1c2230;
+      --muted: #5a6680;
+      --line: #d8dde7;
+      --market: #e9edf3;
+      --prototype: #e0ebda;
+      --evidence: #fbd9b4;
+      --feedback: #fff2cc;
+      --accent: #2f6f4e;
+      --warn: #b3541e;
+    }
+
+    .reveal { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; color: var(--ink); }
+    .reveal .slides { text-align: left; }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 { text-transform: none; letter-spacing: -0.01em; color: var(--navy); font-weight: 700; }
+    .reveal h1 { font-size: 2.4em; line-height: 1.1; }
+    .reveal h2 { font-size: 1.7em; line-height: 1.15; margin-bottom: 0.4em; }
+    .reveal h3 { font-size: 1.15em; margin: 0 0 0.3em; }
+    .reveal p, .reveal li { font-size: 0.78em; line-height: 1.45; }
+    .reveal small { color: var(--muted); }
+    .reveal em { color: var(--navy-2); font-style: normal; font-weight: 600; }
+
+    /* Canvas-style header bar */
+    .bar { background: var(--navy); color: #fff; padding: 14px 22px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; align-items: baseline; }
+    .bar h2 { color: #fff; margin: 0; font-size: 1.4em; }
+    .bar .tag { font-size: 0.65em; opacity: 0.8; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* 4-col canvas top strip */
+    .strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .strip .cell { padding: 14px 14px 16px; border-radius: 6px; min-height: 150px; }
+    .strip .cell h3 { font-size: 0.95em; margin-bottom: 6px; }
+    .strip .cell small { display: block; color: var(--muted); font-size: 0.7em; margin-bottom: 8px; }
+    .strip .cell p { font-size: 0.7em; margin: 0; }
+    .c-market { background: var(--market); }
+    .c-prototype { background: var(--prototype); }
+    .c-evidence { background: var(--evidence); }
+    .c-feedback { background: var(--feedback); }
+
+    /* Generic columns */
+    .cols { display: grid; gap: 18px; margin-top: 14px; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .cols-3-2 { grid-template-columns: 2fr 1fr; }
+
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+    .card.muted { background: #fafbfd; }
+    .card h3 { color: var(--navy); }
+    .card.green { background: var(--prototype); border-color: #c5d4bc; }
+    .card.peach { background: var(--evidence); border-color: #ecbe92; }
+    .card.yellow { background: var(--feedback); border-color: #ecd791; }
+    .card.lavender { background: var(--market); border-color: #c8cfdc; }
+
+    /* Verganti 2x2 matrix */
+    .matrix { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 26px 26px 26px 50px; }
+    .matrix .q { border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-height: 130px; background: #fff; }
+    .matrix .q.here { background: #eef6ee; border: 2px solid var(--accent); box-shadow: 0 6px 24px rgba(47,111,78,0.15); }
+    .matrix .q .qtitle { font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .matrix .q .qmeta { font-size: 0.6em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .axis-x { text-align: center; font-size: 0.7em; color: var(--muted); margin-top: 6px; }
+    .axis-y { position: absolute; left: 0; top: 50%; transform: rotate(-90deg) translateX(50%); transform-origin: 0 0; font-size: 0.7em; color: var(--muted); }
+    .pin { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 0.65em; font-weight: 600; }
+
+    /* Balfour Four Fits */
+    .fits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; align-items: stretch; }
+    .fit { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; position: relative; }
+    .fit .num { position: absolute; top: -10px; left: 12px; background: var(--navy); color: #fff; border-radius: 999px; padding: 2px 10px; font-size: 0.6em; font-weight: 700; letter-spacing: 0.04em; }
+    .fit h3 { font-size: 0.85em; margin-top: 6px; }
+    .fit p { font-size: 0.65em; margin: 4px 0 0; }
+    .fits-cycle { text-align: center; font-size: 0.7em; color: var(--muted); margin-top: 6px; }
+
+    /* Evidence table */
+    table.evidence { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.68em; }
+    table.evidence th { background: var(--navy); color: #fff; text-align: left; padding: 8px 10px; font-weight: 600; }
+    table.evidence td { border: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }
+    table.evidence tr:nth-child(even) td { background: #fafbfd; }
+
+    /* Big number */
+    .kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .kpi .k { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center; }
+    .kpi .k .num { font-size: 1.6em; font-weight: 800; color: var(--accent); }
+    .kpi .k .lbl { font-size: 0.65em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* Old → New meaning */
+    .shift { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; margin-top: 18px; }
+    .shift .side { padding: 16px; border-radius: 8px; min-height: 140px; }
+    .shift .old { background: #f2e9e4; border: 1px solid #d8c7bd; }
+    .shift .new { background: #e0ebda; border: 1px solid #b9cfb0; }
+    .shift .arrow { font-size: 2em; color: var(--accent); font-weight: 700; }
+    .shift h3 { font-size: 0.95em; }
+    .shift ul { margin: 6px 0 0 16px; padding: 0; }
+    .shift li { font-size: 0.7em; }
+
+    /* Title slide */
+    .title-slide { text-align: left; padding: 30px; }
+    .title-slide .eyebrow { color: var(--muted); font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.12em; }
+    .title-slide h1 { font-size: 3em; margin: 10px 0 8px; }
+    .title-slide .sub { font-size: 1.1em; color: var(--navy-2); margin-bottom: 18px; }
+    .title-slide .meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .title-slide .meta div small { color: var(--muted); font-size: 0.6em; text-transform: uppercase; letter-spacing: 0.06em; display: block; }
+    .title-slide .meta div span { font-size: 0.85em; color: var(--navy); font-weight: 600; }
+
+    /* List tweaks */
+    .reveal ul { margin-left: 18px; }
+    .reveal ul li { margin: 2px 0; }
+
+    /* Slide footer */
+    .reveal .footer { position: absolute; bottom: 10px; left: 26px; right: 26px; display: flex; justify-content: space-between; font-size: 0.55em; color: var(--muted); }
+
+    /* Sentence starter */
+    .starter { background: var(--feedback); border-left: 4px solid #d6b540; padding: 12px 14px; margin-top: 14px; font-size: 0.75em; border-radius: 4px; }
+    .starter b { color: var(--navy); }
+
+    /* Print tweaks */
+    @media print { .reveal .footer { color: #888; } }
+  </style>
+</head>
+<body>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ============================== 1. TITLE ============================== -->
+    <section data-background-color="#ffffff">
+      <div class="title-slide">
+        <div class="eyebrow">BEX5413 · Prototype Presentation Canvas</div>
+        <h1>Smart Split</h1>
+        <div class="sub">From bookkeeping to togetherness — bill splitting, reframed.</div>
+
+        <div class="card lavender" style="margin-top: 8px;">
+          <p style="font-size: 0.78em; margin: 0;">
+            A market-first, meaning-aware walkthrough. We answer four questions:
+            <em>Who is hurting?</em> · <em>What did we build and why?</em> · <em>What did customers actually do?</em> · <em>What should we test next?</em>
+          </p>
+        </div>
+
+        <div class="meta">
+          <div><small>Team / venture</small><span>Smart Split</span></div>
+          <div><small>Prototype tested</small><span>Concierge MVP v0.3</span></div>
+          <div><small>Target user</small><span>Trip groups, 22–32</span></div>
+          <div><small>Feedback requested</small><span>Payment-trust + meaning shift</span></div>
+        </div>
+      </div>
+      <aside class="notes">
+        Open by naming the problem once, in one breath: "Splitting bills is the moment a friendship becomes accounting. We are trying to make that moment disappear." Then introduce the team. 30 seconds, no more.
+      </aside>
+    </section>
+
+    <!-- ============================== 2. ROADMAP ============================== -->
+    <section>
+      <div class="bar"><h2>Prototype Presentation Canvas — Roadmap</h2><span class="tag">10 minutes</span></div>
+      <div class="strip">
+        <div class="cell c-market">
+          <h3>1. Market &amp; problem</h3>
+          <small>2 min</small>
+          <p>Category, who, urgent problem, motivations, current alternatives.</p>
+        </div>
+        <div class="cell c-prototype">
+          <h3>2. Prototype &amp; value</h3>
+          <small>3 min</small>
+          <p>Core value proposition, hook, time to value, stickiness.</p>
+        </div>
+        <div class="cell c-evidence">
+          <h3>3. Customer evidence</h3>
+          <small>3 min</small>
+          <p>Who engaged, what they did, what surprised us, what changed.</p>
+        </div>
+        <div class="cell c-feedback">
+          <h3>4. Feedback ask &amp; next test</h3>
+          <small>2 min</small>
+          <p>Riskiest assumption, what feedback we need, one-week commitment.</p>
+        </div>
+      </div>
+
+      <div class="cols cols-2">
+        <div class="card lavender">
+          <h3>Presenter principle</h3>
+          <p>Show the learning trail: market insight → product hypothesis → prototype → customer reaction → next experiment. We do not defend the solution; we name which assumption is still uncertain.</p>
+        </div>
+        <div class="card yellow">
+          <h3>Theory frame</h3>
+          <p><em>Verganti</em> — meaning-driven innovation: we are competing on what splitting <em>feels like</em>, not what features it has. <em>Balfour</em> — Four Fits: market ↔ product ↔ channel ↔ model must all align.</p>
+        </div>
+      </div>
+      <aside class="notes">This is the contract with the room: here's how we'll spend 10 minutes. Land the theory frame in one sentence each — don't lecture.</aside>
+    </section>
+
+    <!-- ============================== 3. CANVAS A — Market top row ============================== -->
+    <section>
+      <div class="bar"><h2>Canvas A · Start with the market</h2><span class="tag">Section 1 / 2 min</span></div>
+      <div class="cols cols-3" style="margin-top: 14px;">
+        <div class="card lavender">
+          <h3>Category</h3>
+          <p><em>Group payments &amp; shared-money infrastructure.</em></p>
+          <p><small>Adjacent — but not — Splitwise (tracking), Venmo (P2P), QuickBooks (accounting). Smart Split is "togetherness infrastructure for shared money."</small></p>
+        </div>
+        <div class="card lavender">
+          <h3>Who</h3>
+          <p><em>Urban Gen-Z &amp; younger millennials, 22–32, who eat out, travel, or share housing in groups of 3–8.</em></p>
+          <p><small>Sub-segment first: <em>trip groups of 4–8</em> — peak pain density, peak repeat use.</small></p>
+        </div>
+        <div class="card lavender">
+          <h3>Urgent problem</h3>
+          <p>Shared spend creates social friction. Existing tools either track (Splitwise) or pay (Venmo) — never both with fairness intelligence.</p>
+          <p><small>What makes it painful now: post-pandemic social re-emergence + inflation = higher shared spend, lower tolerance for friction.</small></p>
+        </div>
+      </div>
+      <aside class="notes">Stay above feature talk. The category sentence is the most important sentence in the whole deck — it tells listeners what we are NOT.</aside>
+    </section>
+
+    <!-- ============================== 4. CANVAS A — middle row ============================== -->
+    <section>
+      <div class="bar"><h2>Canvas A · Why it matters &amp; what they do today</h2><span class="tag">Section 1 / cont.</span></div>
+      <div class="cols cols-3">
+        <div class="card lavender">
+          <h3>Motivations (Jobs-to-be-Done)</h3>
+          <ul>
+            <li><em>Emotional</em> — end the night without owing anyone.</li>
+            <li><em>Social</em> — protect group harmony.</li>
+            <li><em>Operational</em> — drop the mental ledger.</li>
+            <li><em>Economic</em> — stop quietly losing money in forgotten reimbursements.</li>
+          </ul>
+          <p style="margin-top:6px;"><small><em>Job statement:</em> "Help me close the tab on this group, so we can keep being friends."</small></p>
+        </div>
+        <div class="card lavender">
+          <h3>Current alternatives</h3>
+          <ul>
+            <li>Splitwise — tracks; never settles.</li>
+            <li>Venmo / WeChat Pay — settles; never computes fairly.</li>
+            <li>Spreadsheets &amp; mental math — most common, lowest fidelity.</li>
+            <li>"One person eats it" — silent equity tax on the most generous friend.</li>
+          </ul>
+          <p style="margin-top:6px;"><small>Workaround proves problem: 71% of our 28 interviewees use ≥2 tools per trip.</small></p>
+        </div>
+        <div class="card lavender">
+          <h3>Switching forces</h3>
+          <p><em>Pushing them away from the old way:</em> cognitive load, embarrassment, lost money, broken evenings.</p>
+          <p style="margin-top:6px;"><em>Anxiety / friction that could stop adoption:</em></p>
+          <ul>
+            <li>Trust to connect a wallet.</li>
+            <li>"Is the split actually fair?"</li>
+            <li>Group adoption — no value if only one person uses it.</li>
+          </ul>
+        </div>
+      </div>
+      <aside class="notes">Frame motivations as jobs, not features. The switching-forces column is where you signal you understand the adoption math, not just the problem.</aside>
+    </section>
+
+    <!-- ============================== 5. CANVAS A — bottom row ============================== -->
+    <section>
+      <div class="bar"><h2>Canvas A · Success, meaning, position</h2><span class="tag">Section 1 / land it</span></div>
+      <div class="cols cols-3">
+        <div class="card lavender">
+          <h3>Success trigger</h3>
+          <p>What we will see when value lands:</p>
+          <ul>
+            <li>"I forgot we even split it." (qualitative)</li>
+            <li>≥2 repeats within 7 days (behavioral).</li>
+            <li>≥2 group members invited per active user.</li>
+          </ul>
+        </div>
+        <div class="card green">
+          <h3>New meaning</h3>
+          <p><em>Splitting is no longer accounting between friends.</em></p>
+          <p>It is a quiet act of care that makes the money disappear so the relationship can stay.</p>
+          <p style="margin-top:6px;"><small><em>Not just</em> "AI for receipts" — the feature is the enabler of a meaning shift.</small></p>
+        </div>
+        <div class="card yellow">
+          <h3>Innovation position</h3>
+          <p><em>Meaning-driven</em> (Verganti) with AI as enabler.</p>
+          <p style="margin-top:6px;"><small>We are not racing Splitwise on features. We are reframing what splitting <em>means</em> — from ledger to togetherness — and using AI to make the new meaning frictionless.</small></p>
+          <span class="pin">Design-driven · radical meaning, incremental tech</span>
+        </div>
+      </div>
+      <aside class="notes">This slide is the bridge to the Verganti theory slide. Read the "new meaning" sentence slowly — let the room sit with it for a beat before turning to the matrix.</aside>
+    </section>
+
+    <!-- ============================== 6. VERGANTI MATRIX ============================== -->
+    <section>
+      <div class="bar"><h2>Verganti · Where Smart Split sits</h2><span class="tag">Theory frame 1</span></div>
+      <div class="cols cols-3-2">
+        <div>
+          <div class="matrix">
+            <div class="axis-y">Meaning change &nbsp;→&nbsp; radical</div>
+            <div class="q here">
+              <div class="qmeta">Top-left</div>
+              <div class="qtitle">Design-driven / Meaning-driven</div>
+              <p style="font-size:0.65em; margin:4px 0;">Radical meaning, incremental tech. <em>Reframes the experience.</em></p>
+              <span class="pin">Smart Split is here</span>
+            </div>
+            <div class="q">
+              <div class="qmeta">Top-right</div>
+              <div class="qtitle">Technology epiphany</div>
+              <p style="font-size:0.65em; margin:4px 0;">Radical meaning <em>and</em> radical tech. Apple-grade leaps.</p>
+            </div>
+            <div class="q">
+              <div class="qmeta">Bottom-left</div>
+              <div class="qtitle">Market-pull</div>
+              <p style="font-size:0.65em; margin:4px 0;">Incremental meaning &amp; tech. <em>Splitwise updates live here.</em></p>
+            </div>
+            <div class="q">
+              <div class="qmeta">Bottom-right</div>
+              <div class="qtitle">Technology-push</div>
+              <p style="font-size:0.65em; margin:4px 0;">Radical tech, same meaning. <em>"AI for receipts" alone.</em></p>
+            </div>
+          </div>
+          <div class="axis-x">Technology change &nbsp;→&nbsp; radical</div>
+        </div>
+        <div>
+          <div class="card green">
+            <h3>Why this quadrant</h3>
+            <p>The math of splitting has been solved for a decade — Splitwise nailed it. What has <em>not</em> been solved is the social meaning around the math: the awkwardness, the unspoken debts, the friendship tax.</p>
+            <p style="margin-top:6px;">Smart Split changes <em>meaning first</em>, then uses AI (OCR + group context) only to make the new meaning frictionless.</p>
+          </div>
+          <div class="card muted" style="margin-top:10px;">
+            <h3>Risk this frame surfaces</h3>
+            <p>If users only hear "AI receipt scanner," we have collapsed into the tech-push quadrant. Our pitch, onboarding, and metrics must protect the meaning frame.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="notes">Use Verganti to give peers a vocabulary for critique: are we really meaning-driven, or are we wearing meaning as a coat over a tech-push product? Invite that question.</aside>
+    </section>
+
+    <!-- ============================== 7. MEANING SHIFT ============================== -->
+    <section>
+      <div class="bar"><h2>The meaning shift, in one breath</h2><span class="tag">Verganti · old → new</span></div>
+      <div class="shift">
+        <div class="side old">
+          <h3>Old meaning</h3>
+          <p style="font-size:0.78em;"><em>Splitting bills = bookkeeping between friends.</em></p>
+          <ul>
+            <li>Ledger</li>
+            <li>Debt</li>
+            <li>Fairness as math</li>
+            <li>Awkwardness</li>
+          </ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="side new">
+          <h3>New meaning</h3>
+          <p style="font-size:0.78em;"><em>Splitting bills = a quiet act of care.</em></p>
+          <ul>
+            <li>Trust</li>
+            <li>Lightness</li>
+            <li>Fairness as feeling</li>
+            <li>Togetherness</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card muted" style="margin-top:14px;">
+        <p style="font-size:0.78em;"><em>Why this matters (Verganti):</em> in mature categories, feature parity is cheap and copyable; meaning shifts are slow to build and hard to copy. Our moat is the meaning frame, defended by AI execution.</p>
+      </div>
+      <aside class="notes">Pause after reading the new-meaning sentence. Do not over-explain. The slide does the work.</aside>
+    </section>
+
+    <!-- ============================== 8. PROTOTYPE & VALUE ============================== -->
+    <section>
+      <div class="bar"><h2>Prototype &amp; value</h2><span class="tag">Section 2 / 3 min</span></div>
+      <div class="cols cols-2">
+        <div class="card green">
+          <h3>Core value proposition</h3>
+          <p style="font-size:0.85em;"><em>"Snap, split, settled — in under 30 seconds, without a single 'how much do I owe you?'"</em></p>
+          <p style="margin-top:8px;"><em>Hook:</em> one photo of the receipt; the group is settled before dessert arrives.</p>
+        </div>
+        <div class="card green">
+          <h3>What's in the prototype (v0.3)</h3>
+          <ul>
+            <li>AI receipt OCR + line-item assignment.</li>
+            <li>Group-context model: "dinner crew" vs "trip crew."</li>
+            <li>One-tap settlement via wallet integration (concierge for v0.3).</li>
+            <li>Soft-closing nudge: "Everyone's even — close the trip?"</li>
+          </ul>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="k"><div class="num">&lt; 30 s</div><div class="lbl">Time to value (open → settled)</div></div>
+        <div class="k"><div class="num">1 tap</div><div class="lbl">Settlement, not 4 steps</div></div>
+        <div class="k"><div class="num">N+2</div><div class="lbl">Avg invites per user (target)</div></div>
+      </div>
+      <div class="card muted" style="margin-top:12px;">
+        <h3>Stickiness model</h3>
+        <p>Group memory (the crew remembers you) · settlement record (frictionless trust) · soft reputation (subtle karma score) · trip mode (high-frequency repeat surface).</p>
+      </div>
+      <aside class="notes">Lead with the hook sentence, then show the prototype. Resist demoing every feature — show the one moment that proves time-to-value.</aside>
+    </section>
+
+    <!-- ============================== 9. BALFOUR FOUR FITS ============================== -->
+    <section>
+      <div class="bar"><h2>Balfour · The Four Fits, applied</h2><span class="tag">Theory frame 2</span></div>
+      <div class="fits">
+        <div class="fit"><span class="num">1</span><h3>Market ↔ Product</h3><p><em>Trip groups, 22–32.</em> High frequency, high social stakes. Product solves emotional + operational problem — not just the math.</p></div>
+        <div class="fit"><span class="num">2</span><h3>Product ↔ Channel</h3><p>Product <em>is</em> the channel. Every split is a group invite. Viral coefficient = built into the JTBD; zero paid acquisition at seed.</p></div>
+        <div class="fit"><span class="num">3</span><h3>Channel ↔ Model</h3><p>Viral channels demand zero-friction monetisation → freemium. Free for casual groups; premium for multi-currency, AI auto-categorise, trip mode.</p></div>
+        <div class="fit"><span class="num">4</span><h3>Model ↔ Market</h3><p>$4–6/mo per power user matches young-pro willingness to pay for social peace. Transaction-fee tier for high-volume travel groups.</p></div>
+      </div>
+      <div class="fits-cycle">→ &nbsp; if any one fit is loose, growth leaks out of it. Balfour's argument: it's a system, not a checklist. &nbsp; ←</div>
+
+      <div class="cols cols-2" style="margin-top:14px;">
+        <div class="card yellow">
+          <h3>Tightest fit (today)</h3>
+          <p><em>Product ↔ Channel.</em> Every successful split creates an invite event. We have early evidence this works (see customer evidence).</p>
+        </div>
+        <div class="card peach">
+          <h3>Loosest fit (today)</h3>
+          <p><em>Channel ↔ Model.</em> We don't yet know if freemium converts at the rate viral channels demand. This is our biggest open question past prototype.</p>
+        </div>
+      </div>
+      <aside class="notes">Balfour is the discipline check: meaning is romance, fits are math. Name the loosest fit honestly — that's where peer feedback is most useful.</aside>
+    </section>
+
+    <!-- ============================== 10. CUSTOMER EVIDENCE TABLE ============================== -->
+    <section>
+      <div class="bar"><h2>Customer evidence — what they said &amp; did</h2><span class="tag">Section 3 / 3 min</span></div>
+      <table class="evidence">
+        <thead>
+          <tr><th>Customer / segment</th><th>What they said</th><th>What they did</th><th>What we learned or changed</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><em>University roommates</em> · 4 ppl, shared flat</td>
+            <td>"After a week I forget who paid for what."</td>
+            <td>Used a shared Google Sheet that died after day 3.</td>
+            <td>Memory decay is the real failure mode → auto-capture is non-negotiable.</td>
+          </tr>
+          <tr>
+            <td><em>Young couple</em> · 2 ppl, cohabiting</td>
+            <td>"We don't track; it just builds up."</td>
+            <td>Avoided the conversation; one partner felt quietly resentful.</td>
+            <td>Even N=2 has the problem. Couples are a valid secondary segment, not a pivot.</td>
+          </tr>
+          <tr>
+            <td><em>Trip group</em> · 6 ppl, Bali week</td>
+            <td>"20 minutes of math at the airport. Ugh."</td>
+            <td>Tested concierge MVP — settled $1,400 in 90 s.</td>
+            <td>Trips are the killer onboarding moment. Pivoted hero flow to "Start a trip."</td>
+          </tr>
+          <tr>
+            <td><em>Older user</em> · 45+, professional</td>
+            <td>"I'd never connect my bank to that."</td>
+            <td>Walked off at the payment-connect step.</td>
+            <td>Confirms primary segment: Gen-Z / younger millennial. Older = much later.</td>
+          </tr>
+        </tbody>
+      </table>
+      <aside class="notes">Tell the story per row. Don't read the table — narrate the surprise in each row. The "what they did" column is the most important.</aside>
+    </section>
+
+    <!-- ============================== 11. VALIDATION / CONTRADICTION ============================== -->
+    <section>
+      <div class="bar"><h2>Customer evidence checkpoint</h2><span class="tag">Section 3 / cont.</span></div>
+      <div class="cols cols-3">
+        <div class="card green">
+          <h3>Strongest validation signal</h3>
+          <p><em>8 / 10</em> concierge testers invited a friend <em>during</em> the test session — unprompted.</p>
+          <p style="margin-top:6px;"><em>6 / 10</em> settled with real money in v0.3, not just simulated.</p>
+        </div>
+        <div class="card peach">
+          <h3>Strongest contradiction</h3>
+          <p><em>4 / 10</em> first-time testers paused at the payment-connect step. Trust gap is real, not theoretical.</p>
+          <p style="margin-top:6px;">Older sub-segment hard-stopped at the same step — confirms segment focus, but also that the trust UX matters for everyone.</p>
+        </div>
+        <div class="card yellow">
+          <h3>Customer behaviour to watch next</h3>
+          <ul>
+            <li>Day-7 repeat use rate.</li>
+            <li>Invites sent per active user (viral coefficient).</li>
+            <li><em>Settle-rate</em> — % of splits that complete payment, not just compute.</li>
+          </ul>
+        </div>
+      </div>
+      <aside class="notes">"Settle rate" is the metric we want peers to remember. Compute-only is the old meaning; settle is the new meaning expressed as a number.</aside>
+    </section>
+
+    <!-- ============================== 12. FEEDBACK ASK ============================== -->
+    <section>
+      <div class="bar"><h2>Feedback ask · the riskiest assumption</h2><span class="tag">Section 4 / 2 min</span></div>
+      <div class="cols cols-2">
+        <div class="card peach">
+          <h3>Riskiest assumption</h3>
+          <p><em>Users will connect a payment method on first use</em> (trust), <em>and</em> the meaning shift — care, not accounting — drives adoption over feature comparison.</p>
+          <p style="margin-top:6px;"><small>If either half is wrong, the whole "settle in one tap" promise collapses into a better Splitwise.</small></p>
+        </div>
+        <div class="card peach">
+          <h3>Where the prototype logic is weak</h3>
+          <ul>
+            <li>Trust-on-day-one. Should v1 ship without payment connect?</li>
+            <li>Whether "togetherness" survives translation into a 60-character app-store subtitle.</li>
+            <li>Whether the freemium price point is below the threshold of "worth the friction."</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card yellow" style="margin-top:14px;">
+        <h3>Specifically, we are asking peers for:</h3>
+        <ul>
+          <li>What evidence in our deck challenged the "togetherness > accounting" framing?</li>
+          <li>In the trip-group test — is the buyer (trip organiser) the same person as the user (group)? If not, what does that change?</li>
+          <li>Why aren't we charging at the receipt step? (Stress-test our pricing intuition.)</li>
+        </ul>
+      </div>
+      <aside class="notes">Be specific about what you want peers to NOT do: don't suggest features. Do challenge the meaning frame and the fits. Quote the listener principle if needed.</aside>
+    </section>
+
+    <!-- ============================== 13. DECISION + ITERATION ============================== -->
+    <section>
+      <div class="bar"><h2>Decision after feedback &amp; one-week commitment</h2><span class="tag">Section 4 / close</span></div>
+      <div class="cols cols-2">
+        <div class="card lavender">
+          <h3>Decision rules after feedback</h3>
+          <ul>
+            <li><em>Persevere</em> if ≥40% of new trip-segment users connect a wallet in session 1.</li>
+            <li><em>Refine</em> if 20–40% connect <em>and</em> invite-rate ≥1.5 — decouple trust from value (delay payment connect).</li>
+            <li><em>Pivot user</em> if &lt;20% connect — move from "settlement" to "split-intelligence-only" for a more trusting segment.</li>
+            <li><em>Pivot meaning</em> if invites &lt;1 per user — the togetherness frame isn't landing; rebuild it.</li>
+          </ul>
+        </div>
+        <div class="card green">
+          <h3>One-week iteration commitment</h3>
+          <p><em>By next class we will test:</em> payment-connect rate with 10 new trip-segment users on v0.4.</p>
+          <p style="margin-top:6px;"><em>Minimum evidence we will bring back:</em></p>
+          <ul>
+            <li>Connect rate (target ≥40%).</li>
+            <li>Settle rate (target ≥60% of connecters).</li>
+            <li>3+ verbatim quotes on trust hesitation.</li>
+            <li>One short clip of the most confusing moment.</li>
+          </ul>
+        </div>
+      </div>
+      <aside class="notes">Reading the persevere/refine/pivot rules aloud is the single highest-credibility move in the whole deck. It signals you will actually act on evidence.</aside>
+    </section>
+
+    <!-- ============================== 14. LISTENER + Q&A ============================== -->
+    <section>
+      <div class="bar"><h2>Over to you</h2><span class="tag">Q &amp; A</span></div>
+      <div class="cols cols-2">
+        <div class="card muted">
+          <h3>Listener principle (from the canvas)</h3>
+          <p>Ask questions that reveal thinking, evidence, and customer behaviour. Avoid giving feedback ideas too early. Your job is to help us make the next test sharper.</p>
+        </div>
+        <div class="card yellow">
+          <h3>Questions we'd love</h3>
+          <ul>
+            <li>What evidence in the deck most challenges the meaning shift?</li>
+            <li>Which of Balfour's four fits looks loosest to you?</li>
+            <li>What's a cheaper experiment we could run before building v0.4?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="starter">
+        <b>Sentence starter for listeners:</b> &nbsp; "The strongest evidence I heard was ______. The assumption I would test next is ______ because ______."
+      </div>
+      <div class="card lavender" style="margin-top:14px; text-align:center;">
+        <p style="font-size:0.85em; margin: 0;"><em>Thank you.</em> &nbsp;·&nbsp; Smart Split — use, test, learn, iterate.</p>
+      </div>
+      <aside class="notes">Hand over with the listener sentence starter visible. Resist the urge to defend during Q&amp;A — capture, don't argue. The capture sheet is for after.</aside>
+    </section>
+
+    <!-- ============================== 15. APPENDIX (optional) ============================== -->
+    <section data-visibility="uncounted">
+      <div class="bar"><h2>Appendix · Peer feedback capture sheet</h2><span class="tag">Optional — listening team fills this</span></div>
+      <table class="evidence">
+        <thead>
+          <tr><th>Feedback lens</th><th>Strong evidence observed</th><th>Question / concern</th><th>Suggested next experiment</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Market problem</td><td></td><td></td><td></td></tr>
+          <tr><td>Product hypothesis</td><td></td><td></td><td></td></tr>
+          <tr><td>Customer engagement</td><td></td><td></td><td></td></tr>
+          <tr><td>Meaning / innovation</td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+      <div class="starter" style="margin-top:14px;">
+        <b>Feedback sentence starter:</b> &nbsp; "The strongest evidence I heard was ______. The assumption I would test next is ______ because ______."
+      </div>
+      <aside class="notes">Print this slide for peers. Not part of the 10-minute presentation — only used during Q&amp;A and the debrief.</aside>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    width: 1280,
+    height: 760,
+    margin: 0.04,
+    transition: 'fade',
+    controls: true,
+    progress: true,
+    plugins: [ RevealNotes ]
+  });
+</script>
+</body>
+</html>
