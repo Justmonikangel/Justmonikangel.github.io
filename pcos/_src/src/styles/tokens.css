@@ -1,0 +1,28 @@
+:root {
+  --cy-bg-1: #ffe7ee;
+  --cy-bg-2: #fff5e6;
+  --cy-bg-3: #e6f6f4;
+  --cy-primary: #ff6b8a;
+  --cy-primary-ink: #c64166;
+  --cy-accent-warm: #ffa86b;
+  --cy-accent-cool: #6bd5c2;
+  --cy-ink-1: #1f1d2c;
+  --cy-ink-2: #4a4860;
+  --cy-ink-3: #8c8aa3;
+  --cy-line: #ece7f0;
+  --cy-card: #ffffff;
+  --cy-success: #4ec38a;
+  --cy-warn: #f0a93b;
+  --cy-danger: #e0556b;
+}
+
+[data-theme='dark'] {
+  --cy-bg-1: #1a1424;
+  --cy-bg-2: #221a30;
+  --cy-bg-3: #142022;
+  --cy-card: #2a2238;
+  --cy-ink-1: #f3eef7;
+  --cy-ink-2: #c8c0d8;
+  --cy-ink-3: #8a82a0;
+  --cy-line: #3a3050;
+}

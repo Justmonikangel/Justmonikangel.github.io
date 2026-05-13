@@ -1,0 +1,10 @@
+[
+  {
+    "id": "r-001",
+    "takenAt": "2026-04-26T08:00:00.000Z",
+    "cycleDay": 3,
+    "source": "manual",
+    "parsed": true,
+    "notes": "Scaffold seed report"
+  }
+]

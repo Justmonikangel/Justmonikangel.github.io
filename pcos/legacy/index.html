@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Cyster · PCOS 智能咨询平台</title>
+<meta name="description" content="基于 AI Agent 的 PCOS 多囊卵巢综合征个性化咨询、报告解读与社区平台" />
+<link rel="stylesheet" href="css/pcos.css" />
+</head>
+<body>
+
+<!-- ========== APP SHELL ========== -->
+<div id="app" class="app">
+
+  <!-- Server / Section rail (Discord-style) -->
+  <aside class="rail" id="rail">
+    <a class="rail-logo" href="#dashboard" title="Cyster">
+      <span class="logo-dot"></span>
+      <span class="logo-text">CY</span>
+    </a>
+    <nav class="rail-nav">
+      <a class="rail-item" data-route="dashboard" href="#dashboard" title="主页">
+        <svg viewBox="0 0 24 24"><path d="M3 12 12 3l9 9v9h-6v-6H9v6H3z"/></svg>
+      </a>
+      <a class="rail-item" data-route="upload" href="#upload" title="上传分析">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v4h16v-4"/></svg>
+      </a>
+      <a class="rail-item" data-route="report" href="#report" title="健康报告">
+        <svg viewBox="0 0 24 24"><path d="M5 3h11l3 3v15H5z"/><path d="M8 11h8M8 15h6M8 7h6"/></svg>
+      </a>
+      <a class="rail-item" data-route="therapy" href="#therapy" title="个性化方案">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/></svg>
+      </a>
+      <a class="rail-item" data-route="agent" href="#agent" title="AI 智能体">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="11" r="1.2" fill="currentColor"/><circle cx="15" cy="11" r="1.2" fill="currentColor"/><path d="M9 15c1 1 5 1 6 0"/></svg>
+      </a>
+      <a class="rail-item" data-route="community" href="#community" title="社区">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18v11H7l-4 4z"/></svg>
+      </a>
+      <a class="rail-item" data-route="doctors" href="#doctors" title="医师">
+        <svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 4 9 8 10 4-1 8-5 8-10V6z"/><path d="M12 8v6M9 11h6"/></svg>
+      </a>
+      <a class="rail-item" data-route="profile" href="#profile" title="个人主页">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 5-7 8-7s7 2 8 7"/></svg>
+      </a>
+    </nav>
+    <div class="rail-bottom">
+      <button class="rail-item theme-toggle" id="themeToggle" title="切换主题">
+        <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Channel sidebar - changes per section -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <h2 id="sidebarTitle">Cyster</h2>
+      <p id="sidebarSub">PCOS 智能咨询</p>
+    </div>
+    <div class="sidebar-body" id="sidebarBody"></div>
+    <div class="sidebar-foot">
+      <div class="me">
+        <div class="avatar" id="meAvatar">M</div>
+        <div class="me-info">
+          <div class="me-name" id="meName">Monika</div>
+          <div class="me-status"><span class="dot online"></span><span>在线 · Cycle Day <span id="cycleDay">14</span></span></div>
+        </div>
+        <button class="icon-btn" id="logoutBtn" title="退出">
+          <svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M3 12h12m0 0-3-3m3 3-3 3"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content view -->
+  <main class="view" id="view"></main>
+
+  <!-- Floating agent dock -->
+  <button class="agent-dock" id="agentDock" title="召唤 AI 智能体">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="11" r="1.4" fill="#fff"/><circle cx="15" cy="11" r="1.4" fill="#fff"/><path d="M8.5 15c1.2 1.2 5.8 1.2 7 0" stroke="#fff" fill="none"/></svg>
+    <span class="pulse"></span>
+  </button>
+
+  <!-- Slide-in agent panel -->
+  <aside class="agent-panel" id="agentPanel" aria-hidden="true">
+    <header class="agent-head">
+      <div class="agent-id">
+        <div class="avatar agent-ava">AI</div>
+        <div>
+          <div class="agent-name">Cyster Agent</div>
+          <div class="agent-tag">PCOS-trained · 多模型协同</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="agentClose">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="agent-tools">
+      <button class="chip" data-prompt="解读我最近一次的报告">解读最新报告</button>
+      <button class="chip" data-prompt="根据我的体型给出训练计划">训练计划</button>
+      <button class="chip" data-prompt="今天饮食推荐">今日饮食</button>
+      <button class="chip" data-prompt="预测下次月经周期">周期预测</button>
+    </div>
+    <div class="agent-stream" id="agentStream"></div>
+    <form class="agent-input" id="agentForm">
+      <button type="button" class="icon-btn" id="agentAttach" title="附件 / 拍照">
+        <svg viewBox="0 0 24 24"><path d="M21 12 12 21a5 5 0 0 1-7-7l9-9a3.5 3.5 0 1 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>
+      </button>
+      <input type="text" id="agentText" placeholder="问问 Cyster Agent，比如：我的胰岛素抵抗严重吗？" autocomplete="off" />
+      <button type="submit" class="send-btn">
+        <svg viewBox="0 0 24 24"><path d="M3 21l18-9L3 3l4 9z"/></svg>
+      </button>
+    </form>
+  </aside>
+</div>
+
+<!-- ========== TEMPLATES ========== -->
+<template id="tpl-dashboard">
+  <header class="hero">
+    <div class="hero-text">
+      <span class="kicker">Welcome back, <b id="heroName">Monika</b></span>
+      <h1>这是你与 PCOS 共处的<br/>第 <em id="heroDays">214</em> 天。</h1>
+      <p class="lead">今天的 AI 综合评估：<b class="risk-low">代谢稳定 · 风险低</b>。继续保持力量训练与低 GI 饮食。</p>
+      <div class="hero-cta">
+        <button class="btn primary" data-route-go="upload">上传新数据</button>
+        <button class="btn ghost" data-route-go="agent">咨询 Agent</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span>BMI</span><b>22.4</b><i class="trend down">−0.3</i></div>
+      <div class="stat"><span>HOMA-IR</span><b>1.9</b><i class="trend down">−0.4</i></div>
+      <div class="stat"><span>睾酮 ng/dL</span><b>48</b><i class="trend down">−6</i></div>
+      <div class="stat"><span>周期天数</span><b>31</b><i class="trend up">+2</i></div>
+    </div>
+  </header>
+
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <h3>过去一年的健康足迹</h3>
+        <div class="legend">
+          <span class="ll"><i class="sq l0"></i>无</span>
+          <span class="ll"><i class="sq l1"></i>少量</span>
+          <span class="ll"><i class="sq l2"></i>正常</span>
+          <span class="ll"><i class="sq l3"></i>密集</span>
+          <span class="ll"><i class="sq l4"></i>极活跃</span>
+        </div>
+      </div>
+      <div class="contrib" id="contrib"></div>
+      <div class="card-foot">
+        <span><b id="contribTotal">0</b> 次记录</span>
+        <span>当前连击 <b id="contribStreak">0</b> 天</span>
+        <span>最长连击 <b id="contribMax">0</b> 天</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>今日 Agent 简报</h3><span class="tag">自动生成</span></div>
+      <ul class="brief">
+        <li><i class="bullet good"></i><span><b>胰岛素</b> 餐后波动平稳，比上周下降 12%。</span></li>
+        <li><i class="bullet warn"></i><span><b>睡眠</b> 深睡只有 47 分钟，建议提前 30 分钟离开屏幕。</span></li>
+        <li><i class="bullet good"></i><span><b>训练</b> 抗阻训练已连续 4 天，激素响应良好。</span></li>
+        <li><i class="bullet info"></i><span><b>下次预测排卵</b>：5 月 12 日 ± 1 天。</span></li>
+      </ul>
+      <button class="btn ghost block" data-route-go="agent">向 Agent 追问 →</button>
+    </div>
+  </section>
+
+  <section class="grid-3">
+    <div class="card mini">
+      <div class="card-head"><h3>身体组成趋势</h3></div>
+      <canvas id="bodyChart" height="160"></canvas>
+    </div>
+    <div class="card mini">
+      <div class="card-head"><h3>激素六维评估</h3></div>
+      <canvas id="radarChart" height="160"></canvas>
+    </div>
+    <div class="card mini">
+      <div class="card-head"><h3>症状追踪</h3></div>
+      <ul class="symptoms">
+        <li><span>痤疮</span><div class="bar"><i style="width:30%"></i></div><b>低</b></li>
+        <li><span>多毛</span><div class="bar"><i style="width:55%"></i></div><b>中</b></li>
+        <li><span>脱发</span><div class="bar"><i style="width:20%"></i></div><b>低</b></li>
+        <li><span>情绪</span><div class="bar"><i style="width:65%"></i></div><b>中</b></li>
+        <li><span>疲劳</span><div class="bar"><i style="width:40%"></i></div><b>低</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>最新动态</h3><a class="card-link" data-route-go="community">前往社区 →</a></div>
+    <ul class="feed" id="feed"></ul>
+  </section>
+</template>
+
+<template id="tpl-upload">
+  <header class="page-head">
+    <h1>上传你的数据</h1>
+    <p>支持体检 PDF、激素化验单、连续血糖 (CGM) 导出、Apple/华为健康，以及形体照片。所有文件先在本地分析，再决定是否上传云端。</p>
+  </header>
+
+  <div class="grid-2">
+    <div class="card drop-card" id="dropCard">
+      <div class="drop">
+        <svg viewBox="0 0 24 24" class="drop-ico"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v4h16v-4"/></svg>
+        <h3>拖拽文件到这里</h3>
+        <p>或者 <label class="link" for="fileInput">从设备选择</label></p>
+        <input type="file" id="fileInput" multiple hidden />
+        <small>支持 PDF · CSV · JSON · PNG · JPG · DICOM</small>
+      </div>
+      <ul class="filelist" id="fileList"></ul>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>形体照片分析</h3><span class="tag">on-device AI</span></div>
+      <div class="photo-zone">
+        <div class="photo-slot" id="slotFront"><span>正面</span></div>
+        <div class="photo-slot" id="slotSide"><span>侧面</span></div>
+        <div class="photo-slot" id="slotBack"><span>背面</span></div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" hidden />
+      </div>
+      <div class="photo-actions">
+        <button class="btn ghost" id="capBtn">拍照 / 上传</button>
+        <button class="btn primary" id="analyzeBtn">开始体型分析</button>
+      </div>
+      <div class="analysis" id="analysisOut"></div>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="card-head"><h3>手动录入关键指标</h3><span class="tag">≈ 60 秒</span></div>
+    <form class="kv-grid" id="manualForm">
+      <label>身高 cm<input type="number" name="height" value="165"/></label>
+      <label>体重 kg<input type="number" name="weight" value="61"/></label>
+      <label>腰围 cm<input type="number" name="waist" value="74"/></label>
+      <label>臀围 cm<input type="number" name="hip" value="96"/></label>
+      <label>空腹血糖 mmol/L<input type="number" step="0.01" name="fpg" value="5.1"/></label>
+      <label>空腹胰岛素 μU/mL<input type="number" step="0.1" name="ins" value="8.2"/></label>
+      <label>睾酮 ng/dL<input type="number" step="0.1" name="t" value="48"/></label>
+      <label>LH/FSH<input type="number" step="0.01" name="lhfsh" value="2.3"/></label>
+      <label>AMH ng/mL<input type="number" step="0.1" name="amh" value="6.8"/></label>
+      <label>上次月经<input type="date" name="lmp"/></label>
+      <label class="full">情绪 / 备注<textarea name="note" placeholder="本周睡眠不好，痘痘比上次多……"></textarea></label>
+      <div class="form-actions full">
+        <button type="reset" class="btn ghost">清空</button>
+        <button type="submit" class="btn primary">提交并生成报告</button>
+      </div>
+    </form>
+  </section>
+</template>
+
+<template id="tpl-report">
+  <header class="page-head">
+    <h1>健康报告 · 第 <span id="reportNo">12</span> 期</h1>
+    <p>由 Cyster Agent 综合代谢、内分泌、形体与情绪 4 个维度生成。<a href="#" id="exportPdf">导出 PDF</a> · <a href="#agent" data-route-go="agent">让 Agent 解读</a></p>
+  </header>
+
+  <div class="report-summary card">
+    <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="track"/><circle cx="50" cy="50" r="44" class="bar" id="ringBar"/></svg><b id="ringScore">82</b><small>综合分</small></div>
+    <div class="report-meta">
+      <h3>整体表现 <span class="badge ok">良好</span></h3>
+      <p>你的代谢风险持续下降，雄激素已回到正常区间上沿。建议在接下来的 6 周内重点改善睡眠结构与铁元素摄入。</p>
+      <div class="meta-row">
+        <span>检测项</span><b>23 项</b>
+        <span>异常</span><b class="warn">3</b>
+        <span>较上期</span><b class="ok">↑ 6</b>
+      </div>
+    </div>
+  </div>
+
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>代谢面板</h3></div>
+      <table class="report-table">
+        <thead><tr><th>指标</th><th>当前</th><th>参考</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>空腹血糖</td><td>5.1</td><td>3.9–6.1</td><td><span class="badge ok">正常</span></td></tr>
+          <tr><td>HOMA-IR</td><td>1.9</td><td>&lt; 2.5</td><td><span class="badge ok">正常</span></td></tr>
+          <tr><td>HbA1c</td><td>5.4%</td><td>&lt; 5.7%</td><td><span class="badge ok">正常</span></td></tr>
+          <tr><td>甘油三酯</td><td>1.8</td><td>&lt; 1.7</td><td><span class="badge warn">略高</span></td></tr>
+          <tr><td>HDL-C</td><td>1.2</td><td>&gt; 1.3</td><td><span class="badge warn">略低</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>内分泌面板</h3></div>
+      <table class="report-table">
+        <thead><tr><th>指标</th><th>当前</th><th>参考</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>总睾酮</td><td>48</td><td>15–70</td><td><span class="badge ok">正常</span></td></tr>
+          <tr><td>游离睾酮</td><td>2.1</td><td>&lt; 2.0</td><td><span class="badge warn">略高</span></td></tr>
+          <tr><td>LH/FSH</td><td>2.3</td><td>&lt; 2.0</td><td><span class="badge warn">略高</span></td></tr>
+          <tr><td>AMH</td><td>6.8</td><td>2–6.8</td><td><span class="badge ok">边界</span></td></tr>
+          <tr><td>SHBG</td><td>45</td><td>30–90</td><td><span class="badge ok">正常</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>体型 / 形体分析</h3><span class="tag">CV 模型 · v3.2</span></div>
+    <div class="bodyview">
+      <div class="silhouette"><svg viewBox="0 0 120 240" id="silhouette"></svg></div>
+      <ul class="body-list">
+        <li><span>体型分类</span><b>偏内分泌型 (Endo-leaning)</b></li>
+        <li><span>腰臀比 WHR</span><b>0.77</b><i class="ok">健康</i></li>
+        <li><span>腰高比 WHtR</span><b>0.45</b><i class="ok">健康</i></li>
+        <li><span>体脂率估算</span><b>26.8%</b><i class="warn">偏高</i></li>
+        <li><span>肌肉占比</span><b>32.1%</b><i class="ok">良好</i></li>
+        <li><span>体型对称性</span><b>97.4%</b><i class="ok">优</i></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>Agent 综合解读</h3><span class="tag">已引用 4 篇文献</span></div>
+    <div class="agent-readout" id="agentReadout"></div>
+  </section>
+</template>
+
+<template id="tpl-therapy">
+  <header class="page-head">
+    <h1>专属于你的疗愈方案</h1>
+    <p>由 PCOS Agent 基于你最近 30 天的 412 个数据点生成，每周二自动迭代。</p>
+  </header>
+
+  <section class="phase-track">
+    <div class="phase done"><b>Phase 1</b><span>胰岛素敏感重建 · 已完成</span></div>
+    <div class="phase active"><b>Phase 2</b><span>内分泌再平衡 · 第 3/8 周</span></div>
+    <div class="phase"><b>Phase 3</b><span>周期规律化</span></div>
+    <div class="phase"><b>Phase 4</b><span>生育力 / 长期维护</span></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="card therapy-card nutri">
+      <div class="card-head"><h3>营养 · Nutrition</h3><span class="tag">低 GI · 抗炎</span></div>
+      <div class="kv-list">
+        <div><span>每日卡路里</span><b>1680 kcal</b></div>
+        <div><span>蛋白质</span><b>110 g (26%)</b></div>
+        <div><span>碳水</span><b>165 g (38%)</b></div>
+        <div><span>脂肪</span><b>67 g (36%)</b></div>
+      </div>
+      <h4>本周餐单亮点</h4>
+      <ul class="ticks">
+        <li>早：希腊酸奶 + 奇亚籽 + 蓝莓</li>
+        <li>午：三文鱼藜麦碗 + 牛油果</li>
+        <li>晚：鸡胸 + 烤西兰花 + 红薯 1/2 个</li>
+        <li>加餐：核桃 6 颗 / 黑巧 20g</li>
+      </ul>
+    </div>
+
+    <div class="card therapy-card train">
+      <div class="card-head"><h3>训练 · Movement</h3><span class="tag">抗阻 60% · 有氧 30% · 柔韧 10%</span></div>
+      <ul class="train-week">
+        <li><b>周一</b><span>下肢力量 45'</span><i>已完成</i></li>
+        <li><b>周二</b><span>低强度有氧 30' Z2</span><i>已完成</i></li>
+        <li><b>周三</b><span>休息 / 瑜伽 20'</span><i>已完成</i></li>
+        <li><b>周四</b><span>上肢力量 + 核心 50'</span><i class="now">今日</i></li>
+        <li><b>周五</b><span>HIIT 20' (排卵后再做)</span><i></i></li>
+        <li><b>周六</b><span>户外快走 60'</span><i></i></li>
+        <li><b>周日</b><span>主动恢复</span><i></i></li>
+      </ul>
+    </div>
+
+    <div class="card therapy-card supp">
+      <div class="card-head"><h3>补剂 · Supplements</h3><span class="tag">咨询医师后开始</span></div>
+      <ul class="ticks">
+        <li><b>肌醇 (Myo / D-chiro 40:1)</b> — 4 g/天 · 改善胰岛素信号</li>
+        <li><b>维生素 D3</b> — 2000 IU/天 · 调节激素</li>
+        <li><b>Omega-3</b> — 1.5 g EPA+DHA · 抗炎</li>
+        <li><b>镁 (甘氨酸盐)</b> — 300 mg 睡前 · 助眠</li>
+        <li><b>NAC</b> — 600 mg 2x · 卵泡质量</li>
+      </ul>
+    </div>
+
+    <div class="card therapy-card mind">
+      <div class="card-head"><h3>心理 · Mind</h3><span class="tag">CBT-i 第 4 周</span></div>
+      <ul class="ticks">
+        <li>每晚 22:30 离开屏幕 · 红光阅读 20'</li>
+        <li>正念呼吸 4-7-8 × 3 组</li>
+        <li>每周 1 次社区支持小组 (周日 21:00)</li>
+        <li>情绪日记触发词监控：体重 / 痘痘 / 月经</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>方案对比 / 模拟</h3><span class="tag">What-if Agent</span></div>
+    <p class="muted">调整下面的参数，Agent 会预测 12 周后的关键指标变化：</p>
+    <div class="sim">
+      <label>每周训练次数 <input type="range" min="0" max="7" value="4" id="simTrain"/><b id="simTrainV">4</b></label>
+      <label>低 GI 饮食依从度 <input type="range" min="0" max="100" value="70" id="simDiet"/><b id="simDietV">70%</b></label>
+      <label>睡眠时长 (h) <input type="range" min="4" max="10" step="0.5" value="7" id="simSleep"/><b id="simSleepV">7h</b></label>
+      <label>使用肌醇 <input type="checkbox" id="simInositol" checked/></label>
+    </div>
+    <div class="sim-out" id="simOut"></div>
+  </section>
+</template>
+
+<template id="tpl-community">
+  <div class="community">
+    <aside class="ch-list">
+      <div class="ch-server">
+        <h3>Cyster Sisters</h3>
+        <span>14,283 成员 · 412 在线</span>
+      </div>
+      <div class="ch-cat">通告</div>
+      <ul class="ch-ul">
+        <li class="ch active" data-channel="welcome"># 欢迎</li>
+        <li class="ch" data-channel="rules"># 公约</li>
+      </ul>
+      <div class="ch-cat">支持</div>
+      <ul class="ch-ul">
+        <li class="ch" data-channel="newly-dx"># 新确诊</li>
+        <li class="ch" data-channel="meds"># 用药与副作用</li>
+        <li class="ch" data-channel="ttc"># 备孕 (TTC)</li>
+        <li class="ch" data-channel="mental"># 心情角</li>
+      </ul>
+      <div class="ch-cat">生活方式</div>
+      <ul class="ch-ul">
+        <li class="ch" data-channel="kitchen"># 低 GI 厨房</li>
+        <li class="ch" data-channel="gym"># 抗阻训练</li>
+        <li class="ch" data-channel="skin"># 痤疮护理</li>
+      </ul>
+      <div class="ch-cat">语音</div>
+      <ul class="ch-ul">
+        <li class="ch voice"><svg viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9z"/></svg>周日疗愈圈</li>
+        <li class="ch voice"><svg viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9z"/></svg>夜聊 · 失眠俱乐部</li>
+      </ul>
+    </aside>
+
+    <section class="ch-main">
+      <header class="ch-head">
+        <h3 id="chTitle"># 欢迎</h3>
+        <p id="chTopic">读公约 · 介绍自己 · 找到你的 cycle buddy</p>
+        <div class="ch-tools">
+          <button class="icon-btn" title="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+          <button class="icon-btn" title="@提及"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c4 0 7 3 7 6 0 2-1 4-3 4s-3-2-3-4"/></svg></button>
+          <button class="icon-btn" title="成员"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/></svg></button>
+        </div>
+      </header>
+      <div class="messages" id="messages"></div>
+      <form class="composer" id="composer">
+        <button type="button" class="icon-btn" title="附件"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <input id="msgInput" placeholder="在 #欢迎 中说点什么…" />
+        <button type="button" class="icon-btn" title="表情">😊</button>
+        <button type="button" class="icon-btn" id="askAgentInline" title="召唤 Agent">/agent</button>
+      </form>
+    </section>
+
+    <aside class="members">
+      <div class="mem-cat">在线 · 在线社工 (3)</div>
+      <ul class="mem-list">
+        <li><div class="avatar pro">Dr</div><div><b>Dr. Lin</b><span>内分泌科 · 协和</span></div><span class="dot online"></span></li>
+        <li><div class="avatar pro">营</div><div><b>营养师 Yuki</b><span>注册营养师 RD</span></div><span class="dot online"></span></li>
+        <li><div class="avatar pro">心</div><div><b>心理师 Anna</b><span>CBT 治疗师</span></div><span class="dot online"></span></li>
+      </ul>
+      <div class="mem-cat">伙伴 (87)</div>
+      <ul class="mem-list" id="peerList"></ul>
+    </aside>
+  </div>
+</template>
+
+<template id="tpl-doctors">
+  <header class="page-head">
+    <h1>对接专业医师</h1>
+    <p>每位医师都已通过 Cyster 的 PCOS 知识库认证。可分享你的报告（默认匿名脱敏）后再开始问诊。</p>
+  </header>
+
+  <div class="doc-filter">
+    <input placeholder="搜索 · 城市 / 医院 / 专业 / 关键词" id="docSearch"/>
+    <select id="docSpec">
+      <option value="">全部专科</option>
+      <option>内分泌</option><option>妇科内分泌</option><option>生殖医学</option>
+      <option>营养科</option><option>皮肤科</option><option>心理</option>
+    </select>
+    <select id="docMode">
+      <option value="">问诊方式</option>
+      <option>视频</option><option>图文</option><option>线下</option>
+    </select>
+    <label class="check"><input type="checkbox" id="docInsurance"/> 支持医保</label>
+  </div>
+
+  <div class="doc-grid" id="docGrid"></div>
+
+  <div class="modal" id="bookModal" aria-hidden="true">
+    <div class="modal-card">
+      <header><h3 id="bookTitle">预约</h3><button class="icon-btn" id="bookClose">✕</button></header>
+      <div class="book-body">
+        <div class="step">
+          <h4>1. 选择时间</h4>
+          <div class="slots" id="slots"></div>
+        </div>
+        <div class="step">
+          <h4>2. 共享数据</h4>
+          <label class="check"><input type="checkbox" checked/> 健康报告 (脱敏)</label>
+          <label class="check"><input type="checkbox" checked/> 症状追踪记录</label>
+          <label class="check"><input type="checkbox"/> 形体照片 (可撤回)</label>
+        </div>
+        <div class="step">
+          <h4>3. 描述主诉</h4>
+          <textarea placeholder="比如：月经已经 73 天没来，最近脸颊新发痘痘……"></textarea>
+        </div>
+        <button class="btn primary block" id="bookConfirm">确认预约 ¥199</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-agent">
+  <header class="page-head">
+    <h1>Cyster Agent · 你的 24/7 PCOS 智能助理</h1>
+    <p>在 PCOS 临床指南、内分泌教科书、3 万条匿名社区案例上微调。Agent 会主动调用工具：报告解读 / 食物识别 / 周期预测 / 文献检索。</p>
+  </header>
+
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>能力一览</h3></div>
+      <ul class="cap">
+        <li><i>📄</i><b>报告解读</b><span>读取你上传的化验单、CT 文字报告，标注异常并提问。</span></li>
+        <li><i>📷</i><b>形体 / 食物图像</b><span>识别体型、腰臀比、餐盘营养构成。</span></li>
+        <li><i>🩺</i><b>症状问诊</b><span>多轮问诊，定位最可能的 PCOS 表型。</span></li>
+        <li><i>📅</i><b>周期预测</b><span>融合体温、HRV、LH 试纸，预测排卵窗口。</span></li>
+        <li><i>🔬</i><b>文献检索</b><span>实时检索 PubMed / 中国知网，给出引用。</span></li>
+        <li><i>🤝</i><b>转诊</b><span>当问题超出范围，安全转给认证医师。</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>多模型协同</h3></div>
+      <div class="orchestra">
+        <div class="orch-row"><span class="orch-tag">Vision</span><div class="orch-bar"><i style="width:88%"></i></div><b>体型 / 痤疮 / 食物</b></div>
+        <div class="orch-row"><span class="orch-tag">Reasoning</span><div class="orch-bar"><i style="width:96%"></i></div><b>诊断推理 + 工具调用</b></div>
+        <div class="orch-row"><span class="orch-tag">Memory</span><div class="orch-bar"><i style="width:80%"></i></div><b>长期个人健康记忆</b></div>
+        <div class="orch-row"><span class="orch-tag">Safety</span><div class="orch-bar"><i style="width:100%"></i></div><b>医疗安全 / 转诊围栏</b></div>
+        <div class="orch-row"><span class="orch-tag">Triage</span><div class="orch-bar"><i style="width:74%"></i></div><b>风险分级 / 升级</b></div>
+      </div>
+      <p class="muted">所有数据本地加密，端到端可审计。Agent 不会单独给出处方建议。</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>开始一段对话</h3><span class="tag">支持 /命令</span></div>
+    <div class="agent-stream embed" id="agentStream2"></div>
+    <form class="agent-input embed" id="agentForm2">
+      <input id="agentText2" placeholder="试试：/解读 上传的最新报告" autocomplete="off"/>
+      <button class="send-btn" type="submit"><svg viewBox="0 0 24 24"><path d="M3 21l18-9L3 3l4 9z"/></svg></button>
+    </form>
+    <div class="quick">
+      <button class="chip" data-prompt="/解读 我最近一次的胰岛素抵抗指标">/解读 最新指标</button>
+      <button class="chip" data-prompt="/方案 把训练强度上调 20%">/方案 调整训练</button>
+      <button class="chip" data-prompt="/食物 这个外卖会不会影响我？">/食物 识别外卖</button>
+      <button class="chip" data-prompt="/转诊 我想看一位北京的妇科内分泌">/转诊 找医师</button>
+    </div>
+  </section>
+</template>
+
+<template id="tpl-profile">
+  <header class="profile-head">
+    <div class="avatar xl" id="pAva">M</div>
+    <div class="profile-info">
+      <h1>Monika · <span class="muted">@justmonikangel</span></h1>
+      <p>PCOS 表型：胰岛素抵抗型 · 31 岁 · 上海</p>
+      <div class="badges">
+        <span class="badge ok">连续记录 142 天</span>
+        <span class="badge">完成 Phase 1</span>
+        <span class="badge">社区贡献 ×38</span>
+        <span class="badge">志愿姐妹</span>
+      </div>
+    </div>
+    <div class="profile-cta">
+      <button class="btn ghost">分享主页</button>
+      <button class="btn primary">编辑资料</button>
+    </div>
+  </header>
+
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-head"><h3>本月你做了什么</h3><span class="tag">类豆瓣 / GitHub</span></div>
+      <div class="month-grid" id="monthGrid"></div>
+      <div class="month-tags">
+        <span class="m-tag">🥗 23 次低 GI 餐</span>
+        <span class="m-tag">🏋️ 17 次抗阻训练</span>
+        <span class="m-tag">💊 30 天补剂全勤</span>
+        <span class="m-tag">📓 12 次情绪日记</span>
+        <span class="m-tag">🤝 6 次社区互助</span>
+        <span class="m-tag">🩺 2 次医师问诊</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>成就 & 里程碑</h3></div>
+      <ul class="achv">
+        <li><div class="medal m1">🌱</div><b>第一份报告</b><span>2024-09-12</span></li>
+        <li><div class="medal m2">🔥</div><b>30 天连击</b><span>2024-10-12</span></li>
+        <li><div class="medal m3">💪</div><b>HOMA-IR &lt; 2.0</b><span>2024-12-04</span></li>
+        <li><div class="medal m4">🩸</div><b>规律周期 3 个月</b><span>2025-02-28</span></li>
+        <li><div class="medal m5">🤝</div><b>帮助 10 位姐妹</b><span>2025-04-10</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>过去一年 · 全景轨迹</h3></div>
+    <div class="contrib lg" id="contribLg"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h3>时间线</h3></div>
+    <ol class="timeline" id="timeline"></ol>
+  </section>
+</template>
+
+<!-- ========== APP SCRIPTS ========== -->
+<script src="js/data.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/agent.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
