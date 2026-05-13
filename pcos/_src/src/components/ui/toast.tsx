@@ -1,3 +1,4 @@
+// TODO P1: Replace with shadcn-generated toast primitives + Toaster mount.
 export function Toast() {
-  return null;
+  throw new Error('UI component <Toast> is not implemented yet (P1).');
 }
