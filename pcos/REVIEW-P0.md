@@ -228,8 +228,113 @@ P1 acceptance（架构 §16）：
 
 ---
 
-## 7. 引用
+## 7. v2 切换说明（2026-05-13 追加）
 
-- 架构文档：`pcos/ARCHITECTURE.md`
+经过三方 review（Claude / Gemini / GPT），架构已升级到 v2。**v2 是新的真理来源**，参见：
+
+- `pcos/ARCHITECTURE-v2.md` — 新的规范
+- `pcos/MIGRATION-v1-to-v2.md` — v1 到 v2 的对照表（路由 / 类型 / 模块 / 文件）
+- `pcos/DECISIONS.md` — 18 条关键决策日志（D-001..D-018）
+
+`pcos/ARCHITECTURE.md`（v1）保留作为对照，不再更新。
+
+### 7.1 v2 对产品定位的根本调整
+
+- 产品定位收紧为 "PCOS 觉知 + 报告识读 + 共同体"，不再是 "PCOS 智能咨询平台"
+- 首页换为 `AmITheOne` 自测，Dashboard 删除
+- `DiagnosisResult` → `PcosFeatureMap`（不输出 confirmed）
+- `TherapyPlan` → `CareNote`（用户录入，非 AI 方案）
+- `lookupDrug` → `lookupMedicationInfo`（仅科普）
+- 删除 `@tanstack/react-query`
+- 新增 Content Governance 硬约束 + Red-flag 升级机制
+- 新增 P1.5 阶段（Cloudflare Worker proxy + 邀请码）
+
+### 7.2 §6 codex 指令的废弃 / 替换
+
+| §6 原任务 | 状态 |
+|---|---|
+| 1. router 挂 11 个 route | 仍有效，但 route 表换成 v2 §5 列出的 15 个 |
+| 2. AppShell 三栏 | 仍有效 |
+| 3. layout stub TODO 注释 | 仍有效 |
+| 4. shadcn 半组件补全 | 仍有效 |
+| 5. `lib/llm/prompts/system.ts` port v1 §9.3 | **废弃**；改用 v2 §12 的 `PromptBlock[]` 三段式，并把 v2 §16.3 写入 safety 块 |
+| 6. `lib/hormones.ts` 补全 12 字段 | 仍有效 |
+| 7. `lib/cycle.ts` 补 cyclePhase/fertileWindow | 仍有效 |
+| 8. `lib/api.ts` 重写或删除 | **改为直接删除**，P1.5 再加 |
+| 9. LLM adapter 公共工厂 | 仍有效，命名 `createPlaceholderClient(provider, phase)` |
+| 10. legacy/js/data.js 365 天 heatmap port | 仍有效，但 mocks 改名为 `stories.json` + 新增 `knowledgeCards.json` |
+| 11. `agent.test.ts` 改名 `storage.test.ts` | 仍有效 |
+| `lib/tools/parseReport.ts` 处置 | **改为直接删除**（identity stub 无意义） |
+| `lib/tools/lookupDrug.ts` seed 6 种药 | **废弃**；改名 `lookupMedicationInfo.ts`，按 v2 §14.3 实现 |
+
+### 7.3 v2 cutover 新增任务
+
+详见 `pcos/MIGRATION-v1-to-v2.md` §11，分三个 commit：
+
+**Commit 1：code cleanup**（保留 v1 §6 仍有效项 + 上表）
+
+**Commit 2：v2 type & module rename**
+- types：`DiagnosisResult` → `PcosFeatureMap`、`TherapyPlan` → `CareNote`、
+  `Medication` → `PrescribedMedication`，`ChatOpts.system: string` → `PromptBlock[]`
+- types 新增：`KnowledgeCard`、`Citation`、`CommunityStory`、`AmITheOneSession`、
+  `FeatureFlag`、`ExclusionStatus`、`PromptBlock`、`RedFlagPattern`、`SafetyEvent`
+- lib：`rotterdam()` → `pcosFeatureMap()`（2023 指南 + adult/adolescent）
+- tools：`rotterdamCheck` → `computeFeatureMap`，`lookupDrug` → `lookupMedicationInfo`
+- 组件目录：`community/` → `stories/`，`therapy/` → `care/`
+- 路由：13 个改为 v2 §5 的 15 个
+- mocks：删 `therapy.json` + `community.json` → `stories.json`，新增
+  `knowledgeCards.json` / `selfAssessmentQuestions.json` / `redFlagPatterns.json` / `medicationInfo.json`
+
+**Commit 3：v2 新增 lib + governance hard rules**
+- 新增 `lib/safety/` 三件套（`redFlags.ts` / `detect.ts` / `escalation.ts`）
+- 新增 `lib/image/` 三件套（`compress.ts` / `fileToVisionInput.ts` / `validateUpload.ts`）
+- 新增 `lib/knowledge/` + `lib/citations.ts`
+- 新增 `lib/llm/prompts/blocks.ts` + `safety.ts` + `medicalKnowledge.ts` + `userContext.ts`
+  其中 `safety.ts` **必须**包含 v2 §16.3 的全部规则（cache_control: ephemeral）
+- 新增 `components/safety/EmergencyCard.tsx` + `RedFlagNotice.tsx`
+- 新增 `components/amitheone/` + `components/knowledge/` + `components/cycle/` 骨架
+- 安装 `idb-keyval`，新增 `lib/indexedDb.ts`
+
+### 7.4 给 codex 的最终指令（替换 §6）
+
+```
+你已交付 P0。现在请按以下三个文件做一次 P0.5 v2 cutover PR：
+
+- pcos/ARCHITECTURE-v2.md  ← 新规范
+- pcos/MIGRATION-v1-to-v2.md  ← 对照表
+- pcos/DECISIONS.md  ← 决策依据
+
+任务分三个 commit（详见 MIGRATION §11）：
+
+  Commit 1: code cleanup
+  Commit 2: v2 type & module rename
+  Commit 3: v2 新增 lib + content governance hard rules
+
+提交方式：
+- 本地 CLI 提交，不要再逐文件 web 上传
+- 每个 commit 的 body 列出对应任务的勾选状态
+- 整个 PR 标题 "Phase P0.5 v2 cutover: blue-bubble repositioning"
+- PR body 引用 ARCHITECTURE-v2.md §16 Content Governance，承诺所有 AI
+  prompt 都内嵌 §16.3 规则
+
+完成验收（必须全部通过）：
+1. pnpm test 通过（含 pcos.test.ts 的 2023 guideline + adolescent 用例）
+2. pnpm build 通过
+3. /pcos/ 访问能看到 AmITheOne 首页（即便题库还是占位）
+4. 主题切换工作
+5. 13 个新路由全部可达（未实现的指向 RoutePlaceholder）
+6. /pcos/profile/settings 显示 Provider / Model / API Key / Proxy / 
+   Invite Code / Connectivity Test 完整字段（即便 Test 按钮还是 mock）
+7. lib/safety/redFlags.ts + EmergencyCard 存在并通过单元测试
+
+P1 acceptance（v2 §20）下个 PR 再做。
+```
+
+## 8. 引用
+
+- v1 架构（参考用）：`pcos/ARCHITECTURE.md`
+- v2 架构（真理来源）：`pcos/ARCHITECTURE-v2.md`
+- 迁移对照表：`pcos/MIGRATION-v1-to-v2.md`
+- 决策日志：`pcos/DECISIONS.md`
 - 市场分析：`_posts/2026-05-13-PCOS国内市场分析-诊断治疗与药物筛选缺口.md`
 - Legacy 参考：`pcos/legacy/`
