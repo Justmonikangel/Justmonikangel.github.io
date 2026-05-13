@@ -1,0 +1,12 @@
+{
+  "id": "u-001",
+  "displayName": "Cyster Demo",
+  "birthYear": 1997,
+  "heightCm": 165,
+  "weightKg": 60,
+  "cycleAvgDays": 35,
+  "lastPeriodStart": "2026-05-01",
+  "goals": ["regulate-cycle", "metabolic"],
+  "diagnosisStatus": "suspected",
+  "phenotype": "A"
+}
