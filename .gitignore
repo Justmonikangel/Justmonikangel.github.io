@@ -33,3 +33,5 @@ Temporary Items
 
 # debug file
 _site
+node_modules
+pcos/_src/node_modules
