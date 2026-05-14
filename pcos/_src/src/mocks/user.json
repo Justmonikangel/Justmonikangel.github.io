@@ -6,7 +6,7 @@
   "weightKg": 60,
   "cycleAvgDays": 35,
   "lastPeriodStart": "2026-05-01",
-  "goals": ["regulate-cycle", "metabolic"],
-  "diagnosisStatus": "suspected",
-  "phenotype": "A"
+  "population": "adult",
+  "goals": ["understand", "regulate-cycle", "metabolic"],
+  "pcosStatus": "self-suspected"
 }

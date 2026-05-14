@@ -1,10 +1,12 @@
 import type { ZodSchema } from 'zod';
 
-import type { ChatMessage, ToolCall } from '@/types/agent';
+import type { ChatMessage, PromptBlock, ToolCall } from '@/types/agent';
 
 export interface TokenUsage {
   inputTokens: number;
   outputTokens: number;
+  cacheReadInputTokens?: number;
+  cacheCreationInputTokens?: number;
 }
 
 export interface VisionImageInput {
@@ -13,6 +15,10 @@ export interface VisionImageInput {
 }
 
 export interface VisionOpts {
+  /**
+   * v2: vision system prompt is a single text (no block-level caching
+   * benefit on one-shot vision calls). For chat we use PromptBlock[].
+   */
   system: string;
   images: VisionImageInput[];
   schema?: ZodSchema;
@@ -25,13 +31,18 @@ export interface VisionResult {
 }
 
 export interface ChatOpts {
-  system: string;
+  /**
+   * v2: system is an array of PromptBlock for Anthropic-style prompt caching.
+   * Adapters translate this to provider-specific content blocks; the
+   * Anthropic adapter applies cache_control = ephemeral on blocks with
+   * `cache: 'ephemeral'`. See ARCHITECTURE-v2.md §12.
+   */
+  system: PromptBlock[];
   messages: ChatMessage[];
   tools?: ToolDef[];
   model?: string;
   temperature?: number;
   maxTokens?: number;
-  cacheKey?: string;
 }
 
 export type ChatEvent =

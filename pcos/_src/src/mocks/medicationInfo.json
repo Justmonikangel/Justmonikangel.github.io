@@ -1,0 +1,128 @@
+[
+  {
+    "drug": "Metformin",
+    "zhName": "二甲双胍",
+    "brand": ["格华止", "迪化糖锭"],
+    "mechanism": "主要通过抑制肝糖输出和改善外周组织对胰岛素的敏感性发挥作用。",
+    "pcosCommonUses": [
+      "改善胰岛素抵抗",
+      "辅助降低部分患者的雄激素水平",
+      "部分研究观察到月经规律性改善"
+    ],
+    "commonSideEffects": [
+      "胃肠道反应（恶心、腹泻、腹胀）",
+      "长期使用可能影响维生素 B12 水平",
+      "罕见乳酸酸中毒（肾功能不全风险更高）"
+    ],
+    "notesForDoctorDiscussion": [
+      "在 PCOS 适应症内多为说明书外用药，需要医生评估和告知",
+      "胃肠耐受不佳时医生可能从小剂量开始，缓释剂型耐受更好",
+      "备孕女性需医生评估是否继续",
+      "肾功能下降时禁用，需要定期监测"
+    ],
+    "citationIds": ["intl-pcos-2023", "cochrane-metformin-pcos"]
+  },
+  {
+    "drug": "Combined Oral Contraceptive",
+    "zhName": "短效复方口服避孕药（COC）",
+    "brand": ["达英-35", "优思明", "优思悦"],
+    "mechanism": "通过抑制下丘脑–垂体–卵巢轴减少卵巢雄激素分泌，并提高 SHBG 进一步降低游离雄激素活性。",
+    "pcosCommonUses": [
+      "调整月经周期",
+      "降低雄激素相关皮肤问题（痤疮、多毛）",
+      "保护子宫内膜不被长期无对抗雌激素刺激"
+    ],
+    "commonSideEffects": [
+      "突破性出血、乳房胀痛",
+      "情绪变化、性欲变化",
+      "罕见但严重：静脉血栓栓塞风险升高",
+      "对偏头痛、吸烟者、高血压患者风险更高"
+    ],
+    "notesForDoctorDiscussion": [
+      "备孕期间不可使用",
+      "选择不同孕激素成分时需要医生权衡（如含抗雄激素的醋酸环丙孕酮 vs 屈螺酮）",
+      "用药期间出现单侧腿肿、胸痛、剧烈头痛立即就医"
+    ],
+    "citationIds": ["intl-pcos-2023"]
+  },
+  {
+    "drug": "Spironolactone",
+    "zhName": "螺内酯",
+    "brand": ["安体舒通"],
+    "mechanism": "盐皮质激素受体拮抗剂，并具有抗雄激素作用，可减少痤疮和多毛。",
+    "pcosCommonUses": [
+      "缓解痤疮和多毛（与 COC 联用更常见）",
+      "对部分患者改善脱发"
+    ],
+    "commonSideEffects": [
+      "月经周期变化",
+      "高钾血症风险",
+      "电解质和肾功能变化",
+      "致畸风险——备孕和妊娠期禁用"
+    ],
+    "notesForDoctorDiscussion": [
+      "需要避孕同时使用",
+      "用药前后需要医生评估电解质和肾功能",
+      "起效较慢，常需要 3–6 个月观察"
+    ],
+    "citationIds": ["intl-pcos-2023"]
+  },
+  {
+    "drug": "Letrozole",
+    "zhName": "来曲唑",
+    "brand": ["弗隆"],
+    "mechanism": "芳香化酶抑制剂，降低体内雌激素水平，反馈刺激 FSH 升高，从而诱导卵泡发育和排卵。",
+    "pcosCommonUses": [
+      "PCOS 备孕一线促排卵药物（多数指南推荐优于克罗米芬）"
+    ],
+    "commonSideEffects": [
+      "潮热、头痛、疲劳",
+      "多胎妊娠风险（单胎妊娠风险也存在）",
+      "罕见但严重：卵巢过度刺激综合征（OHSS）"
+    ],
+    "notesForDoctorDiscussion": [
+      "需在生殖科或妇科医生监测下使用，需 B 超监测卵泡",
+      "妊娠后立即停药"
+    ],
+    "citationIds": ["intl-pcos-2023"]
+  },
+  {
+    "drug": "Clomiphene",
+    "zhName": "克罗米芬",
+    "brand": ["克罗米芬", "舒经芬"],
+    "mechanism": "选择性雌激素受体调节剂，作用于下丘脑反馈，间接促进 FSH/LH 释放以促排卵。",
+    "pcosCommonUses": [
+      "PCOS 备孕促排卵的传统选择（许多指南现已优先推荐来曲唑）"
+    ],
+    "commonSideEffects": [
+      "潮热、视觉障碍",
+      "多胎妊娠风险",
+      "OHSS 风险",
+      "内膜变薄影响着床"
+    ],
+    "notesForDoctorDiscussion": [
+      "需医生监测周期与卵泡发育",
+      "如多周期无排卵需考虑更换方案"
+    ],
+    "citationIds": ["intl-pcos-2023"]
+  },
+  {
+    "drug": "Inositol",
+    "zhName": "肌醇",
+    "brand": [],
+    "mechanism": "肌醇（特别是 myo-inositol 与 D-chiro-inositol 4:1 比例）参与胰岛素信号转导，被研究用于改善 PCOS 患者的代谢与排卵。",
+    "pcosCommonUses": [
+      "辅助改善胰岛素敏感性",
+      "部分研究观察到月经规律性改善"
+    ],
+    "commonSideEffects": [
+      "通常耐受良好",
+      "高剂量可能引起恶心、轻度胃肠不适"
+    ],
+    "notesForDoctorDiscussion": [
+      "国内并非处方药，但仍建议告知医生你在服用",
+      "证据等级总体中等，不是所有患者都有效"
+    ],
+    "citationIds": ["cochrane-inositol-pcos"]
+  }
+]

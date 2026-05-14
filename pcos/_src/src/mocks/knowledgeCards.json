@@ -1,0 +1,64 @@
+[
+  {
+    "id": "pcos-2023-criteria",
+    "slug": "pcos-2023-criteria",
+    "title": "2023 国际 PCOS 指南怎么定义诊断？",
+    "shortAnswer": "成人：三选二（高雄激素 / 排卵障碍 / 多囊卵巢形态或 AMH 升高），且必须先排除其他原因。",
+    "category": "criteria",
+    "body": "P1 占位：完整正文在 P1 阶段由 owner 与邀请医生写。\n\n要点：\n- 成人路径采用 2023 Monash 主导的 International PCOS Guideline。\n- 临床或生化高雄激素证据满足任一即可。\n- 多囊卵巢形态（PCOM）可由高分辨经阴道超声 AFC ≥ 20/侧 或 AMH 升高（依赖实验室阈值）任一支持。\n- 强制排除：TSH（甲状腺）、催乳素、17-OH 孕酮（CAH）、FSH（POI/绝经过渡），并按临床提示排除库欣综合征和雄激素分泌肿瘤。\n- 青少年（初潮 < 8 年）不使用超声或 AMH，作出诊断需要更高的把握度。",
+    "applicablePopulation": ["adult", "adolescent"],
+    "citations": [
+      {
+        "id": "intl-pcos-2023",
+        "text": "Teede HJ, et al. International Evidence-based Guideline for the Assessment and Management of Polycystic Ovary Syndrome 2023",
+        "url": "https://www.monash.edu/medicine/mchri/pcos/guideline"
+      }
+    ],
+    "lastReviewedAt": "2026-05-13",
+    "reviewedBy": "owner",
+    "authoredBy": "owner",
+    "aiAssisted": false,
+    "relatedCardIds": ["amh-elevation"]
+  },
+  {
+    "id": "amh-elevation",
+    "slug": "amh-and-pcos",
+    "title": "AMH 升高一定是 PCOS 吗？",
+    "shortAnswer": "不一定。AMH 升高是 PCOS 报告里的常见现象，但 AMH 单独不能诊断 PCOS，且不同实验室阈值不同。",
+    "category": "hormone",
+    "body": "P1 占位。\n\n要点：\n- AMH（抗缪勒管激素）反映卵巢储备和小卵泡总量。\n- PCOS 患者群体中 AMH 中位数高于一般人群，但个体差异很大。\n- 2023 指南允许 AMH 升高作为成人 PCOM 的替代证据，但需结合 AFC 与临床特征。\n- 青少年阶段不建议用 AMH 作 PCOS 评估依据。",
+    "applicablePopulation": ["adult"],
+    "citations": [
+      {
+        "id": "amh-pcos-review-2022",
+        "text": "Dewailly D, et al. AMH as a diagnostic marker for PCOS: a systematic review (2022)",
+        "pmid": "35000000"
+      }
+    ],
+    "lastReviewedAt": "2026-05-13",
+    "reviewedBy": "owner",
+    "authoredBy": "owner",
+    "aiAssisted": false,
+    "relatedCardIds": ["pcos-2023-criteria"]
+  },
+  {
+    "id": "pcos-and-depression",
+    "slug": "pcos-and-mood",
+    "title": "情绪糟糕是不是 PCOS 的一部分？",
+    "shortAnswer": "PCOS 患者群体中抑郁和焦虑的发病率约为普通人群的 3 倍。这是医学因素，不是性格缺陷。",
+    "category": "mental",
+    "body": "P1 占位。\n\n要点：\n- 多项荟萃分析显示 PCOS 患者群体中抑郁/焦虑筛查阳性比例显著升高。\n- 可能的机制：胰岛素抵抗、慢性低度炎症、雄激素影响、身体形象压力、共病肥胖等。\n- 这不是「你心理脆弱」，而是医学因素参与。\n- 评估方法包括 PHQ-9、GAD-7 等量表，建议和医生或心理咨询师讨论。",
+    "applicablePopulation": ["adult", "adolescent"],
+    "citations": [
+      {
+        "id": "cooney-2017-meta",
+        "text": "Cooney LG, et al. High prevalence of moderate and severe depressive and anxiety symptoms in PCOS: a systematic review and meta-analysis (2017)",
+        "pmid": "28333286"
+      }
+    ],
+    "lastReviewedAt": "2026-05-13",
+    "reviewedBy": "owner",
+    "authoredBy": "owner",
+    "aiAssisted": false
+  }
+]
