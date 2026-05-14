@@ -1,1 +1,0 @@
-import{u as s,j as e,R as o}from"./index-DmYqhYH7.js";import"./react-CEemyr9j.js";function i(){const{slug:t}=s();return e.jsx(o,{title:`故事 · ${t??""}`,description:"即将开放：经作者授权的真实经历。"})}export{i as default};

@@ -1,0 +1,1 @@
+import{j as e,R as t}from"./index-bCd0OPYT.js";import"./react-CEemyr9j.js";function i(){return e.jsx(t,{title:"设置",description:"Provider / Model / API Key / Proxy / Invite Code / 连通性测试。即将开放。"})}export{i as default};
