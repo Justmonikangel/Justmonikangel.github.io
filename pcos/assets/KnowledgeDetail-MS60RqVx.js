@@ -1,0 +1,1 @@
+import{u as e,j as s,R as o}from"./index-GDD_ApXg.js";import"./react-CEemyr9j.js";function i(){const{slug:t}=e();return s.jsx(o,{title:`卡片 · ${t??""}`,description:"即将开放：完整科普内容 + 真实文献引用。"})}export{i as default};
