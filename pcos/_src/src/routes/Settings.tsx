@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { deleteOriginalImage, listOriginalImageKeys } from '@/lib/indexedDb';
 import { readProviderKey, removeItem, writeProviderKey } from '@/lib/storage';
 import { useSettings, PROVIDER_LABELS, PROVIDER_MODELS, type ProviderId } from '@/store/settings';
 import { useReports } from '@/store/reports';
@@ -94,13 +95,20 @@ export default function Settings() {
     URL.revokeObjectURL(url);
   };
 
-  const handleClearAll = () => {
+  const [clearing, setClearing] = useState(false);
+  const handleClearAll = async () => {
     if (typeof window === 'undefined') return;
-    Object.keys(window.localStorage)
-      .filter((k) => k.startsWith('cyster.'))
-      .forEach((k) => window.localStorage.removeItem(k));
-    setClearConfirmed(false);
-    window.location.reload();
+    setClearing(true);
+    try {
+      Object.keys(window.localStorage)
+        .filter((k) => k.startsWith('cyster.'))
+        .forEach((k) => window.localStorage.removeItem(k));
+      const imageKeys = await listOriginalImageKeys();
+      await Promise.all(imageKeys.map(deleteOriginalImage));
+    } finally {
+      setClearConfirmed(false);
+      window.location.reload();
+    }
   };
 
   return (
@@ -246,14 +254,16 @@ export default function Settings() {
                 type="button"
                 size="sm"
                 onClick={handleClearAll}
+                disabled={clearing}
                 style={{ backgroundColor: 'var(--cy-danger)' }}
               >
-                确认清空所有本地数据
+                {clearing ? '清理中…' : '确认清空 (含原图)'}
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
+                disabled={clearing}
                 onClick={() => setClearConfirmed(false)}
               >
                 取消
@@ -272,10 +282,37 @@ export default function Settings() {
         </div>
       </Card>
 
-      <p className="text-xs leading-5 text-cy-ink-3">
-        Cyster 不会在你不知情的情况下访问网络。所有 LLM 请求都使用你在上面填写的 provider + key（或 proxy）。
-        如果你在生产环境使用，请考虑用受限权限的 API key。
-      </p>
+      <Card className="space-y-3">
+        <h2 className="text-lg font-semibold tracking-tight text-cy-ink-1">隐私说明</h2>
+        <ul className="space-y-1.5 text-sm leading-6 text-cy-ink-2">
+          <li>
+            <span className="font-medium text-cy-ink-1">本地存储：</span>
+            自测结果、报告（结构化部分）、Care Notes、Cycle 打卡、Stories 共鸣标记、设置等
+            全部仅写入你浏览器的 localStorage。可选的"保留原图"会写入 IndexedDB。
+          </li>
+          <li>
+            <span className="font-medium text-cy-ink-1">报告上传 / OCR：</span>
+            当你上传化验单进行 OCR 或让 Agent 解读时，<strong className="text-cy-ink-1">
+              图片或结构化内容会被发送到你选择的 LLM provider（默认 Anthropic）
+            </strong>
+            ；如果填了 Proxy URL，会先经过你的代理。这是 Cyster 唯一离开你设备的数据。
+          </li>
+          <li>
+            <span className="font-medium text-cy-ink-1">Agent 对话：</span>
+            你输入的消息 + 上面的"用户上下文摘要"会一并发送给 provider。建议不要在对话里贴
+            身份证号、住址等敏感个人信息。
+          </li>
+          <li>
+            <span className="font-medium text-cy-ink-1">API Key：</span>
+            仅本地保存（base64 + XOR 混淆，不是真正的加密；这只是防止偶然在屏幕上暴露）。
+            生产环境请使用最小权限的 key。
+          </li>
+          <li>
+            <span className="font-medium text-cy-ink-1">网络：</span>
+            除了 LLM 请求外，Cyster 不会主动联网。没有埋点、没有第三方分析、没有热更新拉取。
+          </li>
+        </ul>
+      </Card>
     </div>
   );
 }

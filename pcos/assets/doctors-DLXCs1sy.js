@@ -1,0 +1,1 @@
+import{b as o,p as e}from"./index-Dim8o16U.js";const t=[{id:"d-001",name:"Dr. Lin",title:"Reproductive Endocrinologist",hospital:"Demo Women's Health Center",city:"Melbourne",specialties:["PCOS","Metabolic Care"],bio:"Mock doctor entry for the scaffold phase."}],r=o()(e(()=>({doctors:t}),{name:"cyster.doctors.v1"}));export{r as u};

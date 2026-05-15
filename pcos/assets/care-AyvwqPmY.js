@@ -1,0 +1,1 @@
+import{b as r,p as n}from"./index-Dim8o16U.js";const p=r()(n(o=>({notes:[],addNote:e=>o(t=>({notes:[e,...t.notes]})),updateNote:(e,t)=>o(s=>({notes:s.notes.map(a=>a.id===e?{...a,...t,updatedAt:new Date().toISOString()}:a)})),removeNote:e=>o(t=>({notes:t.notes.filter(s=>s.id!==e)}))}),{name:"cyster.care.v1"}));export{p as u};

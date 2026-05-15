@@ -16,7 +16,7 @@ const PHASE_COLORS = {
 const PHASE_LABELS: Record<ReturnType<typeof cyclePhase>, string> = {
   menstrual: '月经期',
   follicular: '卵泡期',
-  ovulatory: '排卵期',
+  ovulatory: '排卵窗口附近',
   luteal: '黄体期',
 };
 
@@ -89,8 +89,13 @@ export function CycleRing({ cycleDay, cycleAvgDays, size = 220 }: CycleRingProps
           / {cycleAvgDays} 天
         </text>
       </svg>
-      <div className="text-sm text-cy-ink-2">
-        当前阶段：<span className="font-medium text-cy-ink-1">{PHASE_LABELS[currentPhase]}</span>
+      <div className="space-y-1 text-center">
+        <div className="text-sm text-cy-ink-2">
+          当前阶段：<span className="font-medium text-cy-ink-1">{PHASE_LABELS[currentPhase]}</span>
+        </div>
+        <p className="max-w-[260px] text-xs leading-5 text-cy-ink-3">
+          PCOS 周期可能波动较大。本估计仅用于自我观察，不用于避孕或备孕决策。
+        </p>
       </div>
     </div>
   );

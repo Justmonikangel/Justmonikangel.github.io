@@ -68,8 +68,9 @@ export default function Cycle() {
                   <span className="font-mono tabular-nums text-cy-ink-1">{nextStart}</span>
                 </p>
               ) : null}
-              <p className="text-xs text-cy-ink-3">
-                仅供参考。PCOS 周期常不规律。
+              <p className="text-xs leading-5 text-cy-ink-3">
+                基于你目前的记录做的粗略估计。PCOS 周期可能波动较大，
+                此预测仅用于自我观察，不用于避孕或备孕决策。
               </p>
             </div>
           </div>
