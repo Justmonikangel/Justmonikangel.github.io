@@ -184,13 +184,19 @@
 
   function renderTopbar(r) {
     topbar.innerHTML = "";
+    // Cyster lives on justmonikangel.github.io; use absolute URL so it
+    // works from a Netlify deploy too. Hide entirely when embedded.
+    const onGh = location.hostname.indexOf("justmonikangel.github.io") !== -1;
+    const cysterUrl = onGh ? "/pcos/" : "https://justmonikangel.github.io/pcos/";
+    const isEmbedded = window.self !== window.top;
+
     if (PUBLIC_ROUTES.includes(r)) {
       topbar.innerHTML = `
         <a class="brand" href="#login">
           <span class="brand-mark">S</span>
           <h1 class="brand-wordmark">SmartSplit</h1>
         </a>
-        <a class="back-cyster" href="/pcos/" title="Back to Cyster">← Cyster</a>
+        ${isEmbedded ? "" : `<a class="back-cyster" href="${cysterUrl}" title="Back to Cyster">← Cyster</a>`}
       `;
       return;
     }
@@ -205,7 +211,7 @@
         <span class="user-chip">
           <span class="avatar" style="background:${ava.color}">${ava.emoji}</span>
           <span>${escape(u.displayName || u.username)}</span>
-          <button id="logoutBtn" title="Sign out">⏻</button>
+          <button id="logoutBtn" title="Sign out" aria-label="Sign out">⏻</button>
         </span>
       ` : ""}
     `;
