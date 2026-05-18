@@ -132,6 +132,14 @@ a:hover { text-decoration: underline; }
 }
 .rail-item:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
 
+/* Sister app (SmartSplit) — visually distinct from in-app rail items */
+.rail-split {
+  margin-top: 12px;
+  border: 1.5px dashed var(--teal-2);
+  color: var(--teal-2);
+}
+.rail-split:hover { background: var(--teal); border-color: var(--teal); color: #fff; }
+
 /* ===== Sidebar ===== */
 .sidebar {
   background: var(--side-bg);

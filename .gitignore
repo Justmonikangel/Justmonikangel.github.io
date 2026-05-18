@@ -33,3 +33,7 @@ Temporary Items
 
 # debug file
 _site
+
+# SmartSplit build artefacts (kept out of git; rebuilt locally with `npm run build`)
+smartsplit-src/node_modules
+smartsplit-src/dist
