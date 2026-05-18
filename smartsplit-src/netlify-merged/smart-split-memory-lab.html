@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EasyCollect Customer Profile</title>
+    <meta
+      name="description"
+      content="Customer profile hub for Smart Split: split link, GPS memory map, squad page, and shared memory activity."
+    />
+    <link rel="stylesheet" href="customer-profile.css" />
+  </head>
+  <body>
+    <header class="profile-topbar">
+      <a class="profile-brand" href="index.html">
+        <span class="profile-brand__mark">S</span>
+        <span>EasyCollect</span>
+      </a>
+      <span class="profile-pill">Customer profile</span>
+    </header>
+
+    <main class="profile-shell">
+      <section class="profile-hero">
+        <article class="profile-card">
+          <div class="profile-card__head">
+            <div class="avatar-stack">
+              <div class="avatar-main">A</div>
+              <div class="avatar-badge">4</div>
+            </div>
+            <div class="profile-card__intro">
+              <p class="eyebrow">Profile home</p>
+              <h1>Aya's Smart Split</h1>
+              <p class="profile-copy">
+                A contribution-style home for split rooms, saved GPS stories, squad sessions,
+                and the repeated moments that turn settlement history into a social memory.
+              </p>
+              <div class="profile-badges">
+                <span>14 split sessions</span>
+                <span>3 mapped places</span>
+                <span>92% trust score</span>
+                <span>4 active squadmates</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="app-grid" aria-label="Main app actions">
+            <a class="app-tile app-tile--split" href="/pay/demo-table-token">
+              <span class="app-tile__icon">↗</span>
+              <strong>Split link</strong>
+              <small>Open the live claim room</small>
+            </a>
+            <a class="app-tile app-tile--gps" href="memory-map.html?stop=stop_shibuya&mode=google&note=place">
+              <span class="app-tile__icon">⌖</span>
+              <strong>GPS</strong>
+              <small>Reopen place stories on the map</small>
+            </a>
+            <a class="app-tile app-tile--squad" href="squad.html">
+              <span class="app-tile__icon">◎</span>
+              <strong>Squad</strong>
+              <small>Build face-to-face or remote groups</small>
+            </a>
+            <a class="app-tile app-tile--memory" href="memory-map.html?stop=stop_shibuya&mode=google&note=place#travel-diary">
+              <span class="app-tile__icon">✦</span>
+              <strong>Memories</strong>
+              <small>Browse saved place postcards</small>
+            </a>
+          </div>
+        </article>
+
+        <aside class="profile-side">
+          <article class="summary-card">
+            <p class="eyebrow eyebrow--gold">Live room</p>
+            <h2>Room 728194</h2>
+            <p>
+              Co-located split is open. Two items are still claimable, one shared drink rule is
+              pending, and the squad can still reopen the Tokyo note before the receipt layer.
+            </p>
+            <div class="summary-stats">
+              <span><strong>$38.30</strong> outstanding</span>
+              <span><strong>2</strong> claimable items</span>
+            </div>
+          </article>
+
+          <article class="summary-card summary-card--mint">
+            <p class="eyebrow">Pinned places</p>
+            <h2>Shibuya · Osaka · Kyoto</h2>
+            <p>
+              Every saved stop can reopen as a place-first story, then unfold into settlement
+              detail only when the group needs to talk about the money again.
+            </p>
+            <a class="summary-link" href="memory-map.html?stop=stop_shibuya&mode=google&note=place">Open GPS story</a>
+          </article>
+        </aside>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="github-board">
+          <div class="section-head section-head--github">
+            <div>
+              <p class="eyebrow">Activity graph</p>
+              <h2>38 contribution moments in the last year</h2>
+            </div>
+
+            <div class="year-switch" aria-label="Contribution year selector">
+              <button class="year-switch__button is-active" type="button">2026</button>
+              <button class="year-switch__button" type="button">2025</button>
+            </div>
+          </div>
+
+          <div class="contribution-card">
+            <div class="contribution-months" aria-hidden="true">
+              <span>May</span>
+              <span>Jun</span>
+              <span>Jul</span>
+              <span>Aug</span>
+              <span>Sep</span>
+              <span>Oct</span>
+              <span>Nov</span>
+              <span>Dec</span>
+              <span>Jan</span>
+              <span>Feb</span>
+              <span>Mar</span>
+              <span>Apr</span>
+            </div>
+
+            <div class="contribution-board">
+              <div class="contribution-days" aria-hidden="true">
+                <span>Mon</span>
+                <span>Wed</span>
+                <span>Fri</span>
+              </div>
+              <div class="heatmap-grid" id="contribution-heatmap" aria-label="Contribution activity grid"></div>
+            </div>
+
+            <div class="contribution-footer">
+              <span class="contribution-caption">Saved place check-ins, split approvals, squad joins, and revisit unlocks.</span>
+              <div class="contribution-legend" aria-hidden="true">
+                <span>Less</span>
+                <i class="legend-swatch legend-swatch--0"></i>
+                <i class="legend-swatch legend-swatch--1"></i>
+                <i class="legend-swatch legend-swatch--2"></i>
+                <i class="legend-swatch legend-swatch--3"></i>
+                <span>More</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="profile-sidebar">
+          <details class="insight-card insight-card--fold">
+            <summary class="insight-card__summary">
+              <div>
+                <p class="eyebrow">Signals</p>
+                <h3>Profile health</h3>
+              </div>
+              <span class="insight-card__toggle" aria-hidden="true"></span>
+            </summary>
+
+            <div class="insight-card__body">
+              <div class="insight-list">
+                <div>
+                  <span>Repeat split accuracy</span>
+                  <strong>96%</strong>
+                </div>
+                <div>
+                  <span>Several-times split sessions</span>
+                  <strong>7</strong>
+                </div>
+                <div>
+                  <span>Open disputes this month</span>
+                  <strong>1</strong>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="insight-card insight-card--soft insight-card--fold">
+            <summary class="insight-card__summary">
+              <div>
+                <p class="eyebrow">Pinned squads</p>
+                <h3>Most active circle</h3>
+              </div>
+              <span class="insight-card__toggle" aria-hidden="true"></span>
+            </summary>
+
+            <div class="insight-card__body">
+              <ul class="squad-pins">
+                <li><strong>Tokyo Weekenders</strong><span>4 members · face-to-face</span></li>
+                <li><strong>Long Trip Ledger</strong><span>5 members · remote</span></li>
+                <li><strong>Quarter Bonus Split</strong><span>3 members · recurring</span></li>
+              </ul>
+            </div>
+          </details>
+        </aside>
+      </section>
+
+      <section class="activity-layout">
+        <article class="activity-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Timeline</p>
+              <h2>Contribution activity</h2>
+            </div>
+          </div>
+
+          <div class="activity-feed">
+            <article class="activity-row">
+              <div class="activity-row__stamp activity-row__stamp--rose">⌖</div>
+              <div>
+                <h3>Reopened Shibuya as a place note</h3>
+                <p>Started from GPS, then chose the place tag first so the squad could revisit the story before the receipt.</p>
+                <div class="activity-tags">
+                  <span>Shibuya</span>
+                  <span>GPS</span>
+                  <span>Place note</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="activity-row">
+              <div class="activity-row__stamp activity-row__stamp--blue">↗</div>
+              <div>
+                <h3>Approved Osaka dinner allocation</h3>
+                <p>Confirmed the late-night food split and left the transport add-on open for a second pass.</p>
+                <div class="activity-tags">
+                  <span>Osaka</span>
+                  <span>Split rule</span>
+                  <span>$38.30 outstanding</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="activity-row">
+              <div class="activity-row__stamp activity-row__stamp--mint">◎</div>
+              <div>
+                <h3>Joined a new squad room</h3>
+                <p>Used a shared code to move from the profile home into a face-to-face room with live claiming and visible peer actions.</p>
+                <div class="activity-tags">
+                  <span>Squad</span>
+                  <span>Room code</span>
+                  <span>Live claim</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </article>
+
+        <article class="repo-card">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Pinned modules</p>
+              <h2>What this profile can open</h2>
+            </div>
+          </div>
+
+          <div class="module-grid">
+            <a class="module-card" href="/pay/demo-table-token">
+              <span class="module-card__kicker">Split</span>
+              <h3>Live claim room</h3>
+              <p>Real receipt claims, lock windows, and outstanding settlement state.</p>
+            </a>
+            <a class="module-card" href="memory-map.html?stop=stop_shibuya&mode=google&note=place">
+              <span class="module-card__kicker">GPS</span>
+              <h3>Place story map</h3>
+              <p>Map stops open notebook tags first, then reveal receipt and payment layers.</p>
+            </a>
+            <a class="module-card" href="squad.html">
+              <span class="module-card__kicker">Squad</span>
+              <h3>Join by code</h3>
+              <p>Face-to-face and remote group formation with keypad entry and member profiles.</p>
+            </a>
+            <a class="module-card" href="memory-map.html?stop=stop_kyoto&mode=google&note=place#travel-diary">
+              <span class="module-card__kicker">Memories</span>
+              <h3>Saved postcards</h3>
+              <p>Travel-style keepsakes that stay hidden inside GPS until a place is selected.</p>
+            </a>
+            <a class="module-card" href="templates.html">
+              <span class="module-card__kicker">Templates</span>
+              <h3>Scenario template library</h3>
+              <p>Cinema, long trip, dining out, luxury purchase, and quarterly dividend splits.</p>
+            </a>
+            <a class="module-card" href="https://justmonikangel.github.io/smartsplit/">
+              <span class="module-card__kicker">Sister demo</span>
+              <h3>Snap-the-receipt SmartSplit</h3>
+              <p>Teammate's consumer-side companion: photograph any restaurant receipt, OCR + LLM itemise it, tag who had what, then come back here to settle.</p>
+            </a>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="customer-profile.js"></script>
+  </body>
+</html>
