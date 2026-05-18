@@ -1,15 +1,153 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/smartsplit/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#fff5e6" />
-    <title>SmartSplit · Cyster</title>
-    <script type="module" crossorigin src="/smartsplit/assets/index-CtHrfNSJ.js"></script>
-    <link rel="stylesheet" crossorigin href="/smartsplit/assets/index-DknHXf7-.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>SmartSplit · Snap. Tag. Settle.</title>
+<meta name="description" content="Snap a receipt, tag who had what, settle to the cent. The consumer-side companion to Smart Split MVP." />
+<meta name="theme-color" content="#0d6f46" />
+<link rel="stylesheet" href="css/smartsplit.css" />
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="#home">
+      <span class="brand-mark">S</span>
+      <span class="brand-text">SmartSplit</span>
+    </a>
+    <a class="back-link" href="/pcos/" title="Back to Cyster">← Cyster</a>
+  </header>
+
+  <nav class="pitch-strip" aria-label="Pitch flow">
+    <a class="step" data-step="home" href="#home"><span class="num">1</span>Home</a>
+    <a class="step" data-step="capture" href="#capture"><span class="num">2</span>Capture</a>
+    <a class="step" data-step="squad" href="#squad"><span class="num">3</span>Squad</a>
+    <a class="step" data-step="allocate" href="#allocate"><span class="num">4</span>Allocate</a>
+    <a class="step" data-step="settle" href="#settle"><span class="num">5</span>Settle</a>
+  </nav>
+
+  <main class="view" id="view" aria-live="polite"></main>
+
+  <nav class="bottom-nav">
+    <a data-nav="home" href="#home">
+      <svg viewBox="0 0 24 24"><path d="M3 12 12 3l9 9v9h-6v-6H9v6H3z"/></svg>
+      <span>Home</span>
+    </a>
+    <a data-nav="capture" href="#capture">
+      <svg viewBox="0 0 24 24"><path d="M4 8h4l2-3h4l2 3h4v11H4z"/><circle cx="12" cy="14" r="3.5"/></svg>
+      <span>New split</span>
+    </a>
+    <a data-nav="settle" href="#settle">
+      <svg viewBox="0 0 24 24"><path d="M5 4h14l-1 16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      <span>Settle</span>
+    </a>
+  </nav>
+</div>
+
+<!-- ============ Templates ============ -->
+
+<template id="tpl-home">
+  <section>
+    <p class="eyebrow">Snap. Tag. Settle.</p>
+    <h1 class="h1">Every receipt is a place + a memory.</h1>
+    <p class="lede">One photo splits the cheque to the cent — and pins the night to a place on your shared timeline.</p>
+  </section>
+
+  <section class="hero-cta">
+    <a class="btn primary block" href="#capture">Start a split →</a>
+    <a class="btn ghost block" href="#capture">Or pick a sample receipt</a>
+  </section>
+
+  <section data-history-section hidden>
+    <p class="eyebrow">Memory timeline</p>
+    <div class="history-list" id="historyList"></div>
+  </section>
+
+  <section class="why-card">
+    <p class="eyebrow eyebrow--mint">Why not Splitwise?</p>
+    <ul class="why-list">
+      <li><strong>One shutter click</strong> instead of typing every line item.</li>
+      <li><strong>Per-item × per-person</strong> ledger, integer cents — no "close enough".</li>
+      <li><strong>Place + time</strong> attached to every receipt, so the tab is also a memory.</li>
+    </ul>
+  </section>
+</template>
+
+<template id="tpl-capture">
+  <section>
+    <p class="eyebrow">Step 2 · Capture</p>
+    <h1 class="h1">Pick a sample receipt</h1>
+    <p class="lede">Photo-OCR is on the roadmap. For now, the demo runs on four bullet-proof Australian receipts.</p>
+  </section>
+
+  <div class="sample-grid" id="sampleGrid"></div>
+</template>
+
+<template id="tpl-squad">
+  <section>
+    <p class="eyebrow">Step 3 · Squad</p>
+    <h1 class="h1">Who was there?</h1>
+    <p class="lede">Add everyone who shared the bill. You can edit names anytime.</p>
+  </section>
+
+  <section class="card">
+    <div class="squad-list" id="squadList"></div>
+    <form class="add-person" id="addPerson" autocomplete="off">
+      <input name="name" placeholder="Add a name…" maxlength="24" required />
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+  </section>
+
+  <a class="btn primary block" id="toAllocate" href="#allocate">Next: tag items →</a>
+</template>
+
+<template id="tpl-allocate">
+  <section>
+    <p class="eyebrow">Step 4 · Allocate</p>
+    <h1 class="h1" id="allocateTitle">Tap who had each item.</h1>
+    <p class="lede">Multiple people on one item = split equally for that item.</p>
+  </section>
+
+  <div class="item-list" id="allocateList"></div>
+
+  <a class="btn primary block" href="#settle">Next: settle →</a>
+</template>
+
+<template id="tpl-settle">
+  <section>
+    <p class="eyebrow">Step 5 · Settle</p>
+    <h1 class="h1">Every cent accounted for.</h1>
+  </section>
+
+  <section class="card">
+    <label class="field">
+      <span>Place</span>
+      <input id="placeName" placeholder="e.g. Chin Chin, Melbourne" />
+    </label>
+  </section>
+
+  <section class="card stat-card" id="totalsCard"></section>
+
+  <section>
+    <p class="eyebrow">Each person owes</p>
+    <div class="owed-list" id="owedList"></div>
+  </section>
+
+  <button class="btn primary block" id="settleBtn">Settle & save to memory</button>
+</template>
+
+<template id="tpl-empty">
+  <div class="empty">
+    <div class="emoji">🧾</div>
+    <p id="emptyMsg">Nothing here yet.</p>
+    <a class="btn primary" href="#capture">Start a split</a>
+  </div>
+</template>
+
+<script src="js/samples.js"></script>
+<script src="js/split.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
 </html>
