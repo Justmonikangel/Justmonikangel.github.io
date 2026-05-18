@@ -1,23 +1,13 @@
-/* Pure integer-cent split math.
-   computeSplit(receipt, squad) → totals + per-person breakdown.
-
-   Rules:
-   - Each item has an `assignments` array of personIds who claim it.
-   - Item cost (priceCents × qty) splits equally among those people.
-   - Remainder cents are distributed deterministically to the first N
-     assignees (sorted by id) so totals reconcile exactly.
-   - Service fee is split equally across the full squad (same rule). */
+/* Pure integer-cent split math. */
 window.SS_SPLIT = (function () {
   function distribute(totalCents, recipientIds) {
     const n = recipientIds.length;
     if (n === 0) return {};
     const base = Math.floor(totalCents / n);
-    let remainder = totalCents - base * n;
+    const remainder = totalCents - base * n;
     const sorted = [...recipientIds].sort();
     const out = {};
-    sorted.forEach((id, i) => {
-      out[id] = base + (i < remainder ? 1 : 0);
-    });
+    sorted.forEach((id, i) => { out[id] = base + (i < remainder ? 1 : 0); });
     return out;
   }
 
@@ -35,8 +25,9 @@ window.SS_SPLIT = (function () {
     (receipt.items || []).forEach((item) => {
       const lineTotal = item.priceCents * (item.qty || 1);
       itemsSubtotal += lineTotal;
-      const tagged = (item.assignments || []).filter((id) => owed.hasOwnProperty(id));
-      if (tagged.length === 0) return; // unclaimed line — surfaces later
+      let tagged = (item.assignments || []).filter((id) => owed.hasOwnProperty(id));
+      // Skipped item → falls back to the whole squad (per the Allocate copy).
+      if (tagged.length === 0) tagged = squad.map((p) => p.id);
       const share = distribute(lineTotal, tagged);
       Object.entries(share).forEach(([id, c]) => { owed[id] += c; });
     });
@@ -47,17 +38,11 @@ window.SS_SPLIT = (function () {
       Object.entries(share).forEach(([id, c]) => { owed[id] += c; });
     }
 
-    const totalCents = itemsSubtotal + fee;
-    const unclaimedCents = (receipt.items || []).reduce((sum, it) => {
-      const tagged = (it.assignments || []).filter((id) => owed.hasOwnProperty(id));
-      return tagged.length === 0 ? sum + it.priceCents * (it.qty || 1) : sum;
-    }, 0);
-
     return {
       itemsSubtotalCents: itemsSubtotal,
       serviceFeeCents: fee,
-      totalCents,
-      unclaimedCents,
+      totalCents: itemsSubtotal + fee,
+      unclaimedCents: 0, // skipped items now fall back to whole squad
       perPerson: squad.map((p) => ({
         personId: p.id,
         name: p.name,

@@ -4,137 +4,226 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>SmartSplit · Snap. Tag. Settle.</title>
-<meta name="description" content="Snap a receipt, tag who had what, settle to the cent. The consumer-side companion to Smart Split MVP." />
-<meta name="theme-color" content="#0d6f46" />
+<meta name="description" content="Snap a receipt, tag who had what, settle the cheque to the cent. Embeddable consumer-side companion to the Smart Split MVP." />
+<meta name="theme-color" content="#fcf6e9" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="css/smartsplit.css" />
 </head>
-<body>
+<body data-route="boot">
 
-<div class="app">
-  <header class="topbar">
-    <a class="brand" href="#home">
-      <span class="brand-mark">S</span>
-      <span class="brand-text">SmartSplit</span>
-    </a>
-    <a class="back-link" href="/pcos/" title="Back to Cyster">← Cyster</a>
-  </header>
+<div class="app" id="app" aria-live="polite">
+  <!-- Auth-aware top bar.  Rendered into by js/app.js. -->
+  <header class="topbar" id="topbar"></header>
 
-  <nav class="pitch-strip" aria-label="Pitch flow">
-    <a class="step" data-step="home" href="#home"><span class="num">1</span>Home</a>
-    <a class="step" data-step="capture" href="#capture"><span class="num">2</span>Capture</a>
-    <a class="step" data-step="squad" href="#squad"><span class="num">3</span>Squad</a>
+  <!-- Pitch strip (hidden on login/scenarios). -->
+  <nav class="pitch-strip" id="pitchStrip" aria-label="Pitch flow" hidden>
+    <a class="step" data-step="problem"  href="#problem"><span class="num">1</span>Problem</a>
+    <a class="step" data-step="capture"  href="#capture"><span class="num">2</span>Capture</a>
+    <a class="step" data-step="squad"    href="#squad"><span class="num">3</span>Squad</a>
     <a class="step" data-step="allocate" href="#allocate"><span class="num">4</span>Allocate</a>
-    <a class="step" data-step="settle" href="#settle"><span class="num">5</span>Settle</a>
+    <a class="step" data-step="settle"   href="#settle"><span class="num">5</span>Settle</a>
   </nav>
 
-  <main class="view" id="view" aria-live="polite"></main>
+  <main class="view" id="view"></main>
 
-  <nav class="bottom-nav">
-    <a data-nav="home" href="#home">
-      <svg viewBox="0 0 24 24"><path d="M3 12 12 3l9 9v9h-6v-6H9v6H3z"/></svg>
-      <span>Home</span>
-    </a>
-    <a data-nav="capture" href="#capture">
-      <svg viewBox="0 0 24 24"><path d="M4 8h4l2-3h4l2 3h4v11H4z"/><circle cx="12" cy="14" r="3.5"/></svg>
-      <span>New split</span>
-    </a>
-    <a data-nav="settle" href="#settle">
-      <svg viewBox="0 0 24 24"><path d="M5 4h14l-1 16H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
-      <span>Settle</span>
-    </a>
-  </nav>
+  <!-- Toast slot for transient messages. -->
+  <div class="toast-slot" id="toast" aria-live="assertive"></div>
 </div>
 
-<!-- ============ Templates ============ -->
+<!-- ===================== TEMPLATES ===================== -->
 
-<template id="tpl-home">
-  <section>
-    <p class="eyebrow">Snap. Tag. Settle.</p>
-    <h1 class="h1">Every receipt is a place + a memory.</h1>
-    <p class="lede">One photo splits the cheque to the cent — and pins the night to a place on your shared timeline.</p>
+<template id="tpl-login">
+  <section class="auth-shell" data-anim="rise">
+    <div class="auth-brand">
+      <span class="brand-mark">S</span>
+      <h1 class="brand-wordmark">SmartSplit</h1>
+    </div>
+    <p class="eyebrow">Sign in</p>
+    <h2 class="auth-title">Welcome back.</h2>
+    <p class="auth-sub">Your splits, your memory timeline, your squad — all kept private to you.</p>
+
+    <form class="auth-form" id="loginForm" autocomplete="off">
+      <label class="field">
+        <span>Username</span>
+        <input name="username" type="text" autocomplete="username" placeholder="monika" required minlength="2" maxlength="32" />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="3" />
+      </label>
+
+      <div class="auth-strength" id="authStrength" aria-hidden="true">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+
+      <button class="btn primary block" type="submit" id="loginSubmit">
+        <span class="btn-label">Sign in</span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+        <svg class="btn-check" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+      </button>
+
+      <p class="auth-status" id="authStatus" role="status"></p>
+    </form>
+
+    <div class="auth-alt">
+      <button class="btn ghost block" id="toSignup" type="button">Create an account</button>
+      <button class="btn quiet" id="loginGuest" type="button">Continue as guest →</button>
+    </div>
+
+    <p class="auth-hint">Demo account: <code>monika</code> / <code>monika</code></p>
+  </section>
+</template>
+
+<template id="tpl-signup">
+  <section class="auth-shell" data-anim="rise">
+    <div class="auth-brand">
+      <span class="brand-mark">S</span>
+      <h1 class="brand-wordmark">SmartSplit</h1>
+    </div>
+    <p class="eyebrow">Create account</p>
+    <h2 class="auth-title">Pick a name.</h2>
+    <p class="auth-sub">Stored locally on your device with IndexedDB. No cloud, no email, no tracker.</p>
+
+    <form class="auth-form" id="signupForm" autocomplete="off">
+      <label class="field">
+        <span>Username</span>
+        <input name="username" type="text" placeholder="aya" required minlength="2" maxlength="32" pattern="[A-Za-z0-9_\.\-]+" />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input name="password" type="password" placeholder="at least 4 characters" required minlength="3" />
+      </label>
+      <label class="field">
+        <span>Display name <small>optional</small></span>
+        <input name="displayName" type="text" placeholder="What your friends call you" maxlength="32" />
+      </label>
+
+      <button class="btn primary block" type="submit" id="signupSubmit">
+        <span class="btn-label">Create account</span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+        <svg class="btn-check" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+      </button>
+      <p class="auth-status" id="authStatus" role="status"></p>
+    </form>
+
+    <button class="btn quiet" id="toLogin" type="button">← Back to sign in</button>
+  </section>
+</template>
+
+<template id="tpl-problem">
+  <section class="prose" data-anim="slide-right">
+    <p class="eyebrow eyebrow--coral">The problem</p>
+    <h1 class="display">Still digging through chat history to figure out who paid?</h1>
+    <p class="lede">SmartSplit snaps the receipt, reads it, and pins the memory to the place — so a trip, a household, or a single dinner settles in seconds and lives on as a shared timeline.</p>
+
+    <div class="cta-stack">
+      <a class="btn primary block lg" href="#capture">📸 Snap a receipt to start</a>
+      <a class="btn ghost block" href="#scenarios">📖 First time? See three scenarios</a>
+    </div>
   </section>
 
-  <section class="hero-cta">
-    <a class="btn primary block" href="#capture">Start a split →</a>
-    <a class="btn ghost block" href="#capture">Or pick a sample receipt</a>
+  <section class="prose" data-anim="slide-right" data-delay="60">
+    <p class="eyebrow eyebrow--coral">Your memory</p>
+    <h2 class="h2">Past splits</h2>
+    <div class="history-wrap" id="historyWrap"></div>
+  </section>
+</template>
+
+<template id="tpl-scenarios">
+  <section class="prose" data-anim="slide-right">
+    <p class="eyebrow eyebrow--coral">User guide</p>
+    <h1 class="display">Three scenarios SmartSplit handles natively.</h1>
+    <p class="lede">Other apps assume everyone splits everything equally. We don't. Tap an item, tag a person — the per-cent ledger updates.</p>
   </section>
 
-  <section data-history-section hidden>
-    <p class="eyebrow">Memory timeline</p>
-    <div class="history-list" id="historyList"></div>
-  </section>
+  <div class="scenario-grid" id="scenarioGrid"></div>
 
-  <section class="why-card">
-    <p class="eyebrow eyebrow--mint">Why not Splitwise?</p>
-    <ul class="why-list">
-      <li><strong>One shutter click</strong> instead of typing every line item.</li>
-      <li><strong>Per-item × per-person</strong> ledger, integer cents — no "close enough".</li>
-      <li><strong>Place + time</strong> attached to every receipt, so the tab is also a memory.</li>
-    </ul>
-  </section>
+  <a class="btn primary block lg" href="#capture" data-anim="slide-right" data-delay="120">Got it — snap a receipt →</a>
 </template>
 
 <template id="tpl-capture">
-  <section>
-    <p class="eyebrow">Step 2 · Capture</p>
-    <h1 class="h1">Pick a sample receipt</h1>
-    <p class="lede">Photo-OCR is on the roadmap. For now, the demo runs on four bullet-proof Australian receipts.</p>
-  </section>
+  <section class="prose" data-anim="slide-right">
+    <p class="eyebrow eyebrow--coral">Capture</p>
+    <h1 class="display">One photo, one tap.</h1>
+    <p class="lede">Real OCR is coming. For the demo, four bullet-proof Australian receipts mirror what the parser would return — same shape, same fields.</p>
 
-  <div class="sample-grid" id="sampleGrid"></div>
-</template>
-
-<template id="tpl-squad">
-  <section>
-    <p class="eyebrow">Step 3 · Squad</p>
-    <h1 class="h1">Who was there?</h1>
-    <p class="lede">Add everyone who shared the bill. You can edit names anytime.</p>
-  </section>
-
-  <section class="card">
-    <div class="squad-list" id="squadList"></div>
-    <form class="add-person" id="addPerson" autocomplete="off">
-      <input name="name" placeholder="Add a name…" maxlength="24" required />
-      <button class="btn primary" type="submit">Add</button>
-    </form>
-  </section>
-
-  <a class="btn primary block" id="toAllocate" href="#allocate">Next: tag items →</a>
-</template>
-
-<template id="tpl-allocate">
-  <section>
-    <p class="eyebrow">Step 4 · Allocate</p>
-    <h1 class="h1" id="allocateTitle">Tap who had each item.</h1>
-    <p class="lede">Multiple people on one item = split equally for that item.</p>
-  </section>
-
-  <div class="item-list" id="allocateList"></div>
-
-  <a class="btn primary block" href="#settle">Next: settle →</a>
-</template>
-
-<template id="tpl-settle">
-  <section>
-    <p class="eyebrow">Step 5 · Settle</p>
-    <h1 class="h1">Every cent accounted for.</h1>
-  </section>
-
-  <section class="card">
-    <label class="field">
-      <span>Place</span>
-      <input id="placeName" placeholder="e.g. Chin Chin, Melbourne" />
+    <label class="upload-area" for="receiptFile">
+      <input type="file" id="receiptFile" accept="image/*" capture="environment" hidden />
+      <span class="upload-btn btn primary block lg">📸 Take photo / upload</span>
+      <span class="upload-hint">Tap to pick from camera roll — or scroll for samples ↓</span>
     </label>
   </section>
 
-  <section class="card stat-card" id="totalsCard"></section>
+  <section class="parsed-wrap" id="parsedWrap" hidden data-anim="rise">
+    <p class="eyebrow eyebrow--coral"><span id="parsedTime">Parsed in 0ms</span> · Sample data</p>
+    <h2 class="h2" id="parsedTitle">—</h2>
+    <p class="parsed-place" id="parsedPlace">—</p>
+    <div class="parsed-items" id="parsedItems"></div>
+    <div class="parsed-fee" id="parsedFee"></div>
+    <a class="btn primary block lg" href="#squad">Looks right → Pick the squad</a>
+  </section>
 
-  <section>
-    <p class="eyebrow">Each person owes</p>
+  <div class="receipt-gallery" id="receiptGallery"></div>
+</template>
+
+<template id="tpl-squad">
+  <section class="prose" data-anim="slide-right">
+    <p class="eyebrow eyebrow--coral">Squad</p>
+    <h1 class="display">Who shared this?</h1>
+    <p class="lede">The split is per-item × per-person — not a flat average. Group the right people first.</p>
+  </section>
+
+  <div class="squad-list" id="squadList" data-anim="slide-right" data-delay="60"></div>
+
+  <form class="add-person" id="addPerson" autocomplete="off">
+    <input name="name" placeholder="Add a person…" maxlength="24" required />
+    <button class="btn ghost" type="submit">+ Add</button>
+  </form>
+
+  <a class="btn primary block lg" id="toAllocate" href="#allocate">Next → Tag who ate what</a>
+</template>
+
+<template id="tpl-allocate">
+  <section class="prose" data-anim="slide-right">
+    <p class="eyebrow eyebrow--coral">Allocate</p>
+    <h1 class="display">Tap who had each item.</h1>
+    <p class="lede">Skip an item → it's shared by the whole squad. That's the difference: a real ledger, not a flat average.</p>
+  </section>
+
+  <div class="item-list" id="allocateList" data-anim="slide-right" data-delay="60"></div>
+
+  <a class="btn primary block lg" href="#settle">Next → Settle the tab</a>
+</template>
+
+<template id="tpl-settle">
+  <section class="prose" data-anim="slide-right">
+    <p class="eyebrow eyebrow--coral">Settle</p>
+    <h1 class="display">Every cent accounted for.</h1>
+    <p class="lede">Tag a place — it'll show up on your memory timeline.</p>
+  </section>
+
+  <section class="card" data-anim="rise">
+    <label class="field">
+      <span>Place</span>
+      <input id="placeName" placeholder="e.g. Chin Chin, Melbourne CBD" />
+    </label>
+  </section>
+
+  <section class="totals-card" id="totalsCard" data-anim="rise" data-delay="40"></section>
+
+  <section data-anim="rise" data-delay="80">
+    <p class="eyebrow eyebrow--coral">Each person owes</p>
     <div class="owed-list" id="owedList"></div>
   </section>
 
-  <button class="btn primary block" id="settleBtn">Settle & save to memory</button>
+  <button class="btn primary block lg" id="settleBtn" data-anim="rise" data-delay="120">
+    <span class="btn-label">Settle & save to memory</span>
+    <svg class="btn-check" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>
+  </button>
 </template>
 
 <template id="tpl-empty">
@@ -145,6 +234,22 @@
   </div>
 </template>
 
+<template id="tpl-history-empty">
+  <div class="empty">
+    <div class="emoji">📓</div>
+    <p>No splits yet. The first photo creates your first memory.</p>
+  </div>
+</template>
+
+<!-- ===================== Person chip building block ===================== -->
+<template id="tpl-person-chip">
+  <span class="person-chip">
+    <span class="avatar"></span>
+    <span class="name"></span>
+  </span>
+</template>
+
+<script src="js/db.js"></script>
 <script src="js/samples.js"></script>
 <script src="js/split.js"></script>
 <script src="js/store.js"></script>

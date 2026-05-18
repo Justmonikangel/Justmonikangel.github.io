@@ -1,10 +1,14 @@
-/* SmartSplit · single state container, persisted to localStorage. */
+/* SmartSplit · in-memory state container, bridged to IndexedDB through
+   the auth flow and split-save points. */
 window.SS_STORE = (function () {
-  const KEY = "smartsplit:v2";
+  const SESSION_KEY = "smartsplit:session";
+
   const DEFAULT = {
-    squad: [{ id: "p_self", name: "Me" }],
-    receipt: null,
-    history: [],
+    currentUser: null,           // { username, displayName, ... } when logged in
+    squad: [],                   // [{ id, name, avatar }]
+    receipt: null,               // { id, title, placeName, items[], serviceFeeCents }
+    history: [],                 // [{ id, title, placeName, settledAt, totalCents, ... }]
+    lastParseMs: 0,              // for "Parsed in N ms" display
   };
 
   let state = clone(DEFAULT);
@@ -12,41 +16,22 @@ window.SS_STORE = (function () {
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      state = {
-        squad: Array.isArray(parsed.squad) && parsed.squad.length > 0
-          ? parsed.squad
-          : DEFAULT.squad.slice(),
-        receipt: parsed.receipt || null,
-        history: Array.isArray(parsed.history) ? parsed.history : [],
-      };
-    } catch (e) {
-      console.warn("[SmartSplit] failed to load state", e);
-    }
-  }
-
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); }
-    catch (e) { console.warn("[SmartSplit] save failed", e); }
-  }
-
   function getState() { return state; }
+
+  function setState(patch) {
+    state = { ...state, ...patch };
+    subs.forEach((fn) => { try { fn(state); } catch (e) { console.error(e); } });
+  }
 
   function update(fn) {
     const next = fn(state);
     if (next && next !== state) state = next;
-    save();
     subs.forEach((s) => { try { s(state); } catch (e) { console.error(e); } });
   }
 
-  function subscribe(fn) {
-    subs.add(fn);
-    return () => subs.delete(fn);
-  }
+  function subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }
+
+  function reset() { state = clone(DEFAULT); }
 
   let _seq = 0;
   function newId(prefix) {
@@ -54,5 +39,20 @@ window.SS_STORE = (function () {
     return prefix + "_" + Date.now().toString(36) + "_" + _seq.toString(36);
   }
 
-  return { load, save, getState, update, subscribe, newId };
+  /* ---------- Session ---------- */
+  function loadSession() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }
+    catch (e) { return null; }
+  }
+  function saveSession(user) {
+    if (!user) localStorage.removeItem(SESSION_KEY);
+    else localStorage.setItem(SESSION_KEY, JSON.stringify({
+      username: user.username, displayName: user.displayName,
+    }));
+  }
+
+  return {
+    getState, setState, update, subscribe, reset, newId,
+    loadSession, saveSession,
+  };
 })();

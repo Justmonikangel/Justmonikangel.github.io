@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SmartSplit · Embed it anywhere</title>
+<meta name="description" content="How to drop SmartSplit into any web page as a Web Component or iframe." />
+<style>
+  :root {
+    --bg: #fcf6e9;
+    --ink: #1f2a26;
+    --ink-soft: #4a5752;
+    --muted: #7d8884;
+    --line: #e5dcc7;
+    --paper: #ffffff;
+    --green: #1f3d35;
+    --coral: #c75d3e;
+    --serif: "Lora", "Iowan Old Style", Georgia, serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 28px 80px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 48px;
+    align-items: start;
+  }
+  .pitch h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(34px, 4.5vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+  }
+  .eyebrow {
+    color: var(--coral);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+  }
+  .pitch p { color: var(--ink-soft); max-width: 54ch; font-size: 16px; }
+  .pitch h2 {
+    margin: 28px 0 8px;
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  pre {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.55;
+    box-shadow: 0 4px 12px rgba(31, 42, 38, 0.04);
+  }
+  pre .c { color: #7e8a85; }
+  pre .k { color: var(--coral); }
+  pre .s { color: var(--green); }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+  .live {
+    position: sticky;
+    top: 28px;
+  }
+  .demo-label {
+    text-align: center;
+    margin: 0 0 8px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .links {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .links a.primary {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+  }
+  @media (max-width: 880px) {
+    .wrap { grid-template-columns: 1fr; gap: 32px; }
+    .live { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <section class="pitch">
+    <p class="eyebrow">Embed it</p>
+    <h1>SmartSplit, dropped into any page as a Web Component.</h1>
+    <p>Receipts, squads, settling — the full 5-step flow plus a per-user IndexedDB account system, all from a single line of HTML. Style-isolated inside a shadow DOM so the host page's CSS can't bleed in.</p>
+
+    <div class="pill-row">
+      <span class="pill">📦 ~96 KB total</span>
+      <span class="pill">🌐 Pure HTML/CSS/JS</span>
+      <span class="pill">🔒 IndexedDB-backed</span>
+      <span class="pill">🌗 Web + mobile</span>
+    </div>
+
+    <h2>1 · Drop the script tag</h2>
+<pre><span class="k">&lt;script</span> <span class="s">src=</span><span class="s">"https://justmonikangel.github.io/smartsplit/js/embed.js"</span><span class="k">&gt;&lt;/script&gt;</span></pre>
+
+    <h2>2 · Place the element wherever</h2>
+<pre><span class="k">&lt;smart-split&gt;&lt;/smart-split&gt;</span>
+
+<span class="c">&lt;!-- or customised: --&gt;</span>
+<span class="k">&lt;smart-split</span>
+  <span class="s">width=</span><span class="s">"380px"</span>
+  <span class="s">height=</span><span class="s">"780px"</span>
+  <span class="s">src=</span><span class="s">"https://justmonikangel.github.io/smartsplit/#capture"</span><span class="k">&gt;&lt;/smart-split&gt;</span></pre>
+
+    <h2>3 · Or just iframe it</h2>
+<pre><span class="k">&lt;iframe</span> <span class="s">src=</span><span class="s">"https://justmonikangel.github.io/smartsplit/"</span>
+        <span class="s">width=</span><span class="s">"440"</span> <span class="s">height=</span><span class="s">"900"</span>
+        <span class="s">title=</span><span class="s">"SmartSplit"</span> <span class="s">style=</span><span class="s">"border:0;border-radius:22px;"</span><span class="k">&gt;&lt;/iframe&gt;</span></pre>
+
+    <div class="links">
+      <a class="primary" href="/smartsplit/">Open the standalone app →</a>
+      <a href="/pcos/">← Cyster</a>
+    </div>
+  </section>
+
+  <aside class="live">
+    <p class="demo-label">Live · Web Component</p>
+    <smart-split width="420px" height="900px"></smart-split>
+  </aside>
+</main>
+
+<script src="js/embed.js"></script>
+</body>
+</html>
