@@ -73,6 +73,16 @@ OmbreBrain 没配 URL 时 `ombreEnabled()` 直接返回 false，整个语义层�
 
 digest 用 Claude 而不是 Haiku，因为论文/CV 类内容压缩失真代价高，先稳，后面想省钱让 Codex 加 `CLAUDE_COMPACTION_MODEL=claude-haiku-4-5-20251001` 即可。
 
+### 4.5. 中英双语 prompt
+
+`orchestrator/relay.ts` 的 `composeSystem()` 输出的 system message 全部双语（EN + ZH 并排），分段标题用 `# Role / # Relay protocol / # Language policy / # Effort` 这种英文骨架，每段内 EN/ZH 各一句。
+
+Language policy 段写死规则：
+
+> 用户通常用中文写指令，被改的稿件（论文、CV）通常是英文。按当前任务的语种匹配：对中文提问用中文回答，对英文稿件的改写继续用英文。技术术语和专有名词保留原文。除非明确要求，否则不要翻译用户的稿件。
+
+Skill 预设（`skills/*/SKILL.md`）也是双语，EN 段 + ZH 段，两个模型都能直接吃。
+
 ### 5. 派生到本地
 
 `GET /api/sessions/:id/fork` 用 `tar -czf -` 直接把 `data/sessions/<id>/` 整目录流式打包返回。下载下来就是：
