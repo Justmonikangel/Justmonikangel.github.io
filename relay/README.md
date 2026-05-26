@@ -1,14 +1,39 @@
 # relay
 
-后端：Claude ↔ GPT 中转对话平台。前端由 Gemini 设计、对接 SSE。
+后端：Claude ↔ GPT 中转对话平台。前端在 `web/`，React + Vite + Tailwind。
+
+> ⚠️ **必读：API key ≠ 订阅**
+>
+> 这平台用的是 SDK 直连，不是网页订阅。你**必须**有这两个 key（订阅 Claude Pro / ChatGPT Plus **没用**，那是 chat 产品的钱）：
+>
+> - `sk-ant-...` —— 从 https://console.anthropic.com → API Keys 新建，按 token 计费
+> - `sk-proj-...` —— 从 https://platform.openai.com → API Keys 新建，按 token 计费
+>
+> 这两个 console 跟 claude.ai / chatgpt.com 是分开的账号系统、分开的钱包。没有 API key，所有 `/turn` 都会 401。
 
 ## 启动
 
 ```bash
 cd relay
-cp .env.example .env   # 填入 ANTHROPIC_API_KEY / OPENAI_API_KEY / OMBREBRAIN_URL
+cp .env.example .env   # 填入 ANTHROPIC_API_KEY / OPENAI_API_KEY / OMBREBRAIN_*
 npm install
 npm run dev            # tsx watch, 默认 http://localhost:8787
+```
+
+前端在另一个终端：
+
+```bash
+cd relay/web
+npm install
+npm run dev            # http://localhost:5173, /api 自动 proxy 到 :8787
+```
+
+或者生产模式一个进程（前端构建产物由后端 serveStatic 兜底）：
+
+```bash
+cd relay/web && npm run build
+cd .. && npm run start
+# http://localhost:8787 同时是 API 和 UI
 ```
 
 ## 接口速查

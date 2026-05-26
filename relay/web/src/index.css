@@ -8,14 +8,15 @@ html, body, #root {
 }
 
 .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(63 63 70); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(226 232 240); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgb(203 213 225); }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 
 .streaming-cursor::after {
   content: '▍';
   margin-left: 2px;
   animation: blink 1s steps(2, start) infinite;
-  color: rgb(161 161 170);
+  color: rgb(148 163 184);
 }
 @keyframes blink {
   to { visibility: hidden; }

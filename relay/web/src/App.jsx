@@ -1,26 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Plus,
   Download,
-  Send,
+  SlidersHorizontal,
   ArrowLeftRight,
-  Loader2,
-  FileText,
-  Image as ImageIcon,
-  FileQuestion,
+  Send,
+  Paperclip,
   X,
+  Plus,
   KeyRound,
   Check,
-  Settings,
+  Loader2,
 } from 'lucide-react'
 import { api, setToken, streamTurn } from './api'
 
-const ROLE_LABEL = {
-  user: '我',
-  claude: 'Claude',
-  gpt: 'GPT',
-  system: 'system',
-}
+const ROLE_LABEL = { user: '我', claude: 'Claude', gpt: 'GPT' }
 
 export default function App() {
   const [sessions, setSessions] = useState([])
@@ -28,17 +21,24 @@ export default function App() {
   const [manifest, setManifest] = useState(null)
   const [turns, setTurns] = useState([])
   const [availableSkills, setAvailableSkills] = useState([])
+  const [showSkills, setShowSkills] = useState(false)
+
   const [input, setInput] = useState('')
   const [attachments, setAttachments] = useState([])
-  const [dragHover, setDragHover] = useState(false)
-  const [streaming, setStreaming] = useState(null)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const [activeStreaming, setActiveStreaming] = useState(null)
   const [streamingText, setStreamingText] = useState('')
-  const [errorBanner, setErrorBanner] = useState('')
-  const [showSettings, setShowSettings] = useState(false)
-  const [tokenInput, setTokenInput] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('relay-token') || '' : ''))
+
+  const [error, setError] = useState('')
+  const [showToken, setShowToken] = useState(false)
+  const [tokenInput, setTokenInput] = useState(() =>
+    typeof window !== 'undefined' ? localStorage.getItem('relay-token') || '' : '',
+  )
   const [busy, setBusy] = useState(false)
-  const claudeColRef = useRef(null)
-  const gptColRef = useRef(null)
+
+  const claudeRef = useRef(null)
+  const gptRef = useRef(null)
 
   useEffect(() => {
     reloadSessions()
@@ -55,21 +55,19 @@ export default function App() {
   }, [currentId])
 
   useEffect(() => {
-    if (streaming === 'claude') scrollToEnd(claudeColRef)
-    if (streaming === 'gpt') scrollToEnd(gptColRef)
-  }, [streamingText, streaming])
-
-  function scrollToEnd(ref) {
-    const el = ref.current
-    if (el) el.scrollTop = el.scrollHeight
-  }
+    if (activeStreaming === 'claude' && claudeRef.current) {
+      claudeRef.current.scrollTop = claudeRef.current.scrollHeight
+    }
+    if (activeStreaming === 'gpt' && gptRef.current) {
+      gptRef.current.scrollTop = gptRef.current.scrollHeight
+    }
+  }, [streamingText, activeStreaming])
 
   async function reloadSessions() {
     try {
-      const list = await api.listSessions()
-      setSessions(list)
+      setSessions(await api.listSessions())
     } catch (err) {
-      setErrorBanner(`failed to list sessions: ${err.message}`)
+      setError(`无法连接后端：${err.message}`)
     }
   }
 
@@ -79,18 +77,19 @@ export default function App() {
       setManifest(m)
       setTurns(Array.isArray(t) ? t : [])
     } catch (err) {
-      setErrorBanner(`load failed: ${err.message}`)
+      setError(`session 加载失败：${err.message}`)
     }
   }
 
   async function handleNew() {
-    const title = window.prompt('Session 标题', '新一轮修改') || 'untitled'
+    const title = window.prompt('Session 标题', '新一轮修改')
+    if (title === null) return
     try {
-      const m = await api.createSession(title)
+      const m = await api.createSession(title || 'untitled')
       await reloadSessions()
       setCurrentId(m.id)
     } catch (err) {
-      setErrorBanner(`create failed: ${err.message}`)
+      setError(`创建失败：${err.message}`)
     }
   }
 
@@ -99,7 +98,7 @@ export default function App() {
     try {
       await api.downloadFork(manifest.id, `${manifest.title || 'session'}-${manifest.id.slice(0, 8)}.tar.gz`)
     } catch (err) {
-      setErrorBanner(`fork failed: ${err.message}`)
+      setError(`派生失败：${err.message}`)
     }
   }
 
@@ -108,18 +107,25 @@ export default function App() {
     const enabled = manifest.skills.includes(name)
     const next = enabled ? manifest.skills.filter((s) => s !== name) : [...manifest.skills, name]
     try {
-      const updated = await api.patchSession(manifest.id, { skills: next })
-      setManifest(updated)
+      setManifest(await api.patchSession(manifest.id, { skills: next }))
     } catch (err) {
-      setErrorBanner(`skill toggle failed: ${err.message}`)
+      setError(`skill 切换失败：${err.message}`)
     }
   }
 
+  function onDragOver(e) {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+  function onDragLeave(e) {
+    e.preventDefault()
+    setIsDragging(false)
+  }
   async function onDrop(e) {
     e.preventDefault()
-    setDragHover(false)
+    setIsDragging(false)
     if (!currentId) {
-      setErrorBanner('先建一个 session 再拖文件')
+      setError('先新建或选一个 session 再拖文件')
       return
     }
     const files = Array.from(e.dataTransfer.files)
@@ -129,7 +135,7 @@ export default function App() {
       const uploaded = await api.upload(currentId, files)
       setAttachments((prev) => [...prev, ...uploaded])
     } catch (err) {
-      setErrorBanner(`upload failed: ${err.message}`)
+      setError(`上传失败：${err.message}`)
     } finally {
       setBusy(false)
     }
@@ -139,11 +145,11 @@ export default function App() {
     setAttachments((prev) => prev.filter((a) => a.id !== id))
   }
 
-  async function send(target, { withMessage }) {
+  async function runStream(target, withMessage) {
     if (!currentId) return
     if (withMessage && !input.trim() && !attachments.length) return
-    setErrorBanner('')
-    setStreaming(target)
+    setError('')
+    setActiveStreaming(target)
     setStreamingText('')
 
     const messagePayload = withMessage ? { content: input, attachments } : undefined
@@ -153,18 +159,14 @@ export default function App() {
     }
 
     try {
-      await streamTurn(
-        currentId,
-        { target, message: messagePayload },
-        {
-          onDelta: (chunk) => setStreamingText((prev) => prev + chunk),
-          onError: (msg) => setErrorBanner(msg),
-        },
-      )
+      await streamTurn(currentId, { target, message: messagePayload }, {
+        onDelta: (chunk) => setStreamingText((prev) => prev + chunk),
+        onError: (msg) => setError(msg),
+      })
     } catch (err) {
-      setErrorBanner(err.message)
+      setError(err.message)
     } finally {
-      setStreaming(null)
+      setActiveStreaming(null)
       setStreamingText('')
       await refreshSession(currentId)
       await reloadSessions()
@@ -173,7 +175,7 @@ export default function App() {
 
   function saveToken() {
     setToken(tokenInput.trim())
-    setShowSettings(false)
+    setShowToken(false)
     reloadSessions()
   }
 
@@ -181,282 +183,374 @@ export default function App() {
   const gptTurns = useMemo(() => turns.filter((t) => t.role === 'gpt'), [turns])
   const userTurns = useMemo(() => turns.filter((t) => t.role === 'user'), [turns])
 
+  const canSend = Boolean(currentId) && !activeStreaming
+  const hasInput = input.trim().length > 0 || attachments.length > 0
+
   return (
-    <div className="flex h-full flex-col bg-zinc-950 text-zinc-100">
-      <TopBar
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-800 font-sans selection:bg-blue-100 selection:text-blue-900 flex flex-col relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-40">
+        <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[120px] opacity-30"></div>
+        <div className="absolute bottom-[-15%] right-[-5%] w-[700px] h-[700px] bg-cyan-200 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"></div>
+        <div className="absolute top-[20%] left-[30%] w-[800px] h-[400px] bg-indigo-200 rounded-full mix-blend-multiply filter blur-[140px] opacity-20"></div>
+      </div>
+
+      <Header
         sessions={sessions}
         currentId={currentId}
+        manifest={manifest}
+        availableSkills={availableSkills}
         onPick={setCurrentId}
         onNew={handleNew}
         onFork={handleFork}
         canFork={Boolean(manifest)}
-        onToggleSettings={() => setShowSettings((v) => !v)}
-        manifest={manifest}
-        availableSkills={availableSkills}
+        showSkills={showSkills}
+        setShowSkills={setShowSkills}
         onSkillToggle={handleSkillToggle}
+        showToken={showToken}
+        setShowToken={setShowToken}
+        tokenInput={tokenInput}
+        setTokenInput={setTokenInput}
+        saveToken={saveToken}
       />
-      {errorBanner ? (
-        <div className="border-b border-red-900/50 bg-red-950/40 px-4 py-2 text-xs text-red-300 flex items-center gap-2">
-          <span className="flex-1">{errorBanner}</span>
-          <button onClick={() => setErrorBanner('')} className="hover:text-red-100"><X size={14} /></button>
+
+      {error ? (
+        <div className="z-10 mx-auto mt-3 flex w-fit max-w-2xl items-center gap-2 rounded-lg border border-red-200 bg-red-50/80 px-4 py-2 text-xs text-red-700 backdrop-blur">
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="hover:text-red-900"><X className="w-3 h-3" /></button>
         </div>
       ) : null}
-      {showSettings ? (
-        <div className="border-b border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm">
-          <label className="flex items-center gap-2">
-            <KeyRound size={14} className="text-zinc-400" />
-            <span className="text-zinc-400">RELAY_TOKEN</span>
-            <input
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              className="flex-1 rounded bg-zinc-800 px-2 py-1 outline-none focus:ring-1 focus:ring-zinc-600"
-              placeholder="如果后端没设 RELAY_TOKEN 就留空"
-              type="password"
-              autoComplete="off"
-            />
-            <button onClick={saveToken} className="flex items-center gap-1 rounded bg-emerald-700 px-2 py-1 text-xs hover:bg-emerald-600">
-              <Check size={14} /> 存
-            </button>
-          </label>
-        </div>
-      ) : null}
-      <div className="grid flex-1 grid-cols-12 gap-px overflow-hidden bg-zinc-800">
+
+      <main className="flex-1 flex overflow-hidden z-10">
         <ModelColumn
-          title="Claude"
-          accent="text-amber-300"
-          colRef={claudeColRef}
+          side="left"
+          name="Claude"
+          accent="indigo"
+          colRef={claudeRef}
           turns={claudeTurns}
-          streaming={streaming === 'claude'}
+          isStreaming={activeStreaming === 'claude'}
           streamingText={streamingText}
-          empty={currentId ? '让 Claude 说点什么——把 GPT 那边的反馈"原样发给我"按钮在中间。' : '左上角新建或选一个 session。'}
-          className="col-span-4 bg-zinc-950"
+          emptyHint={currentId ? '让 Claude 接 GPT 的反馈——点底部的 "Relay to GPT" / "Relay to Claude"。' : '右上角新建或选一个 session。'}
+          relayLabel="Relay to GPT"
+          onRelay={() => canSend && runStream('gpt', false)}
+          relayDisabled={!canSend || turns.length === 0}
         />
-        <CenterPane
-          className="col-span-4 bg-zinc-950"
+
+        <DirectorCanvas
           userTurns={userTurns}
           input={input}
           setInput={setInput}
           attachments={attachments}
           removeAttachment={removeAttachment}
-          dragHover={dragHover}
-          setDragHover={setDragHover}
+          isDragging={isDragging}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
           onDrop={onDrop}
           busy={busy}
-          canSend={Boolean(currentId)}
-          send={send}
-          streaming={streaming}
-          turns={turns}
+          canSend={canSend}
+          hasInput={hasInput}
+          onSendClaude={() => runStream('claude', true)}
+          onSendGpt={() => runStream('gpt', true)}
         />
+
         <ModelColumn
-          title="GPT"
-          accent="text-emerald-300"
-          colRef={gptColRef}
+          side="right"
+          name="GPT"
+          accent="sky"
+          colRef={gptRef}
           turns={gptTurns}
-          streaming={streaming === 'gpt'}
+          isStreaming={activeStreaming === 'gpt'}
           streamingText={streamingText}
-          empty={currentId ? '把稿件拖进中间输入框，然后 "Send → GPT"。' : '左上角新建或选一个 session。'}
-          className="col-span-4 bg-zinc-950"
+          emptyHint={currentId ? '把稿件拖进中间，点 "To GPT"。' : '右上角新建或选一个 session。'}
+          relayLabel="Relay to Claude"
+          onRelay={() => canSend && runStream('claude', false)}
+          relayDisabled={!canSend || turns.length === 0}
         />
-      </div>
+      </main>
     </div>
   )
 }
 
-function TopBar({ sessions, currentId, onPick, onNew, onFork, canFork, onToggleSettings, manifest, availableSkills, onSkillToggle }) {
+function Header({
+  sessions, currentId, manifest, availableSkills,
+  onPick, onNew, onFork, canFork,
+  showSkills, setShowSkills, onSkillToggle,
+  showToken, setShowToken, tokenInput, setTokenInput, saveToken,
+}) {
   return (
-    <div className="border-b border-zinc-800 bg-zinc-900/60">
-      <div className="flex items-center gap-3 px-4 py-2">
-        <span className="text-sm font-semibold tracking-wide text-zinc-300">relay</span>
-        <span className="text-xs text-zinc-500">claude ↔ gpt</span>
-        <div className="flex-1" />
-        <select
-          value={currentId ?? ''}
-          onChange={(e) => onPick(e.target.value || null)}
-          className="max-w-xs rounded bg-zinc-800 px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-zinc-600"
-        >
-          <option value="">— 选 session —</option>
-          {sessions.map((s) => (
-            <option key={s.id} value={s.id}>{s.title || s.id.slice(0, 8)} · {s.turnCount} turns</option>
-          ))}
-        </select>
-        <button onClick={onNew} className="flex items-center gap-1 rounded bg-zinc-800 px-2 py-1 text-sm hover:bg-zinc-700">
-          <Plus size={14} /> 新建
-        </button>
-        <button
-          onClick={onFork}
-          disabled={!canFork}
-          className="flex items-center gap-1 rounded bg-zinc-800 px-2 py-1 text-sm hover:bg-zinc-700 disabled:opacity-40 disabled:hover:bg-zinc-800"
-        >
-          <Download size={14} /> 派生到本地
-        </button>
-        <button onClick={onToggleSettings} className="flex items-center gap-1 rounded bg-zinc-800 px-2 py-1 text-sm hover:bg-zinc-700">
-          <Settings size={14} />
-        </button>
-      </div>
-      {manifest ? (
-        <div className="flex flex-wrap items-center gap-2 border-t border-zinc-800/60 px-4 py-2 text-xs text-zinc-400">
-          <span className="text-zinc-500">skills:</span>
-          {availableSkills.length === 0 ? <span className="text-zinc-600">（无）</span> : null}
-          {availableSkills.map((name) => {
-            const on = manifest.skills.includes(name)
-            return (
-              <button
-                key={name}
-                onClick={() => onSkillToggle(name)}
-                className={
-                  'rounded border px-2 py-0.5 ' +
-                  (on
-                    ? 'border-emerald-700/60 bg-emerald-900/30 text-emerald-200'
-                    : 'border-zinc-700 text-zinc-400 hover:bg-zinc-800')
-                }
-              >
-                {on ? '✓ ' : ''}{name}
-              </button>
-            )
-          })}
-          <span className="flex-1" />
-          <span className="text-zinc-600">compacted through turn {manifest.compactedThrough} · {manifest.turnCount} turns total</span>
+    <>
+      <header className="px-8 py-5 border-b border-slate-200/60 flex justify-between items-center bg-white/70 backdrop-blur-xl sticky top-0 z-20">
+        <div className="flex items-center space-x-6">
+          <h1 className="text-sm font-semibold tracking-widest uppercase text-slate-800">Relay Control</h1>
+          <div className="flex items-center space-x-2 text-xs text-slate-500">
+            <span className={`w-2 h-2 rounded-full ${currentId ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]' : 'bg-slate-300'}`}></span>
+            <select
+              value={currentId ?? ''}
+              onChange={(e) => onPick(e.target.value || null)}
+              className="max-w-[220px] bg-transparent text-xs text-slate-500 focus:outline-none cursor-pointer"
+            >
+              <option value="">— pick session —</option>
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id}>{s.title || s.id.slice(0, 8)} · {s.turnCount}t</option>
+              ))}
+            </select>
+          </div>
+          {manifest ? (
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+              {manifest.turnCount} turns · compacted thru {manifest.compactedThrough}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <HeaderButton onClick={onNew} icon={Plus} label="New Session" />
+          <Divider />
+          <HeaderButton
+            onClick={() => setShowSkills((v) => !v)}
+            icon={SlidersHorizontal}
+            label={manifest?.skills?.length ? `Skills (${manifest.skills.length})` : 'Skills'}
+            active={Boolean(manifest?.skills?.length)}
+            disabled={!manifest}
+          />
+          <HeaderButton onClick={onFork} icon={Download} label="Fork (.tar.gz)" disabled={!canFork} />
+          <Divider />
+          <HeaderButton
+            onClick={() => setShowToken((v) => !v)}
+            icon={KeyRound}
+            label={tokenInput ? 'Token ✓' : 'Token'}
+            active={Boolean(tokenInput)}
+          />
+        </div>
+      </header>
+
+      {showSkills && manifest ? (
+        <div className="z-10 border-b border-slate-200/40 bg-white/60 backdrop-blur px-8 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] uppercase tracking-widest text-slate-400">Skills:</span>
+            {availableSkills.length === 0 ? <span className="text-xs text-slate-400">（无可用）</span> : null}
+            {availableSkills.map((name) => {
+              const on = manifest.skills.includes(name)
+              return (
+                <button
+                  key={name}
+                  onClick={() => onSkillToggle(name)}
+                  className={
+                    'rounded-full border px-3 py-1 text-xs transition ' +
+                    (on
+                      ? 'border-blue-300 bg-blue-50 text-blue-700'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-blue-200 hover:bg-blue-50/50')
+                  }
+                >
+                  {on ? '✓ ' : ''}{name}
+                </button>
+              )
+            })}
+          </div>
         </div>
       ) : null}
-    </div>
+
+      {showToken ? (
+        <div className="z-10 border-b border-slate-200/40 bg-white/60 backdrop-blur px-8 py-3 flex items-center gap-2 text-sm">
+          <KeyRound className="w-4 h-4 text-slate-400" />
+          <span className="text-xs uppercase tracking-wider text-slate-500">RELAY_TOKEN</span>
+          <input
+            value={tokenInput}
+            onChange={(e) => setTokenInput(e.target.value)}
+            type="password"
+            autoComplete="off"
+            placeholder="若后端没设 RELAY_TOKEN 就留空"
+            className="flex-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-300 focus:outline-none"
+          />
+          <button onClick={saveToken} className="flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100">
+            <Check className="w-3 h-3" /> 存
+          </button>
+        </div>
+      ) : null}
+    </>
   )
 }
 
-function ModelColumn({ title, accent, colRef, turns, streaming, streamingText, empty, className }) {
+function HeaderButton({ onClick, icon: Icon, label, active, disabled }) {
   return (
-    <div className={'flex flex-col overflow-hidden ' + (className || '')}>
-      <div className="border-b border-zinc-800 px-4 py-2 text-xs uppercase tracking-wider text-zinc-500">
-        <span className={accent + ' font-semibold'}>{title}</span>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={
+        'flex items-center space-x-2 text-xs uppercase tracking-wider transition-colors p-2 ' +
+        (disabled
+          ? 'text-slate-300 cursor-not-allowed'
+          : active
+            ? 'text-blue-600 hover:text-blue-700'
+            : 'text-slate-500 hover:text-blue-600')
+      }
+    >
+      <Icon className="w-4 h-4" />
+      <span>{label}</span>
+    </button>
+  )
+}
+
+function Divider() {
+  return <div className="w-px h-4 bg-slate-200"></div>
+}
+
+function ModelColumn({ side, name, accent, colRef, turns, isStreaming, streamingText, emptyHint, relayLabel, onRelay, relayDisabled }) {
+  const borderSide = side === 'left' ? 'border-r' : 'border-l'
+  const headerBg = accent === 'indigo' ? 'bg-indigo-50/30' : 'bg-sky-50/30'
+  const headerText = accent === 'indigo' ? 'text-indigo-600' : 'text-sky-600'
+  const accentHover = accent === 'indigo'
+    ? 'hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50'
+    : 'hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50'
+
+  return (
+    <section className={`w-1/3 ${borderSide} border-slate-200/60 bg-white/80 backdrop-blur-sm flex flex-col relative`}>
+      <div className={`px-6 py-4 border-b border-slate-100 ${headerBg} flex justify-between items-center`}>
+        <span className={`text-xs uppercase tracking-widest font-medium ${headerText}`}>{name}</span>
+        {isStreaming ? <span className={`text-[10px] uppercase ${headerText} animate-pulse`}>Receiving...</span> : null}
       </div>
-      <div ref={colRef} className="scrollbar-thin flex-1 space-y-4 overflow-y-auto px-4 py-3">
-        {turns.length === 0 && !streaming ? <div className="mt-8 text-center text-xs text-zinc-600">{empty}</div> : null}
-        {turns.map((t) => (
-          <TurnBubble key={`${t.role}-${t.index}`} turn={t} />
-        ))}
-        {streaming ? (
-          <div className="rounded border border-zinc-800 bg-zinc-900/50 p-3">
-            <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-500">
-              <Loader2 size={10} className="animate-spin" /> streaming
+      <div ref={colRef} className="scrollbar-thin flex-1 overflow-y-auto px-6 py-4 space-y-4 text-sm leading-relaxed font-light text-slate-600">
+        {turns.length === 0 && !isStreaming ? (
+          <div className="mt-12 text-center text-xs text-slate-400">{emptyHint}</div>
+        ) : null}
+        {turns.map((t) => <TurnCard key={`${t.role}-${t.index}`} turn={t} />)}
+        {isStreaming ? (
+          <div className="rounded-lg border border-slate-100 bg-white/60 p-4">
+            <div className="mb-2 text-[10px] uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Loader2 className="w-3 h-3 animate-spin" /> streaming
             </div>
-            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-zinc-100 streaming-cursor">{streamingText}</pre>
+            <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700 streaming-cursor">{streamingText}</pre>
           </div>
         ) : null}
       </div>
-    </div>
+      <div className="p-4 border-t border-slate-100 bg-white/50 flex justify-center">
+        <button
+          onClick={onRelay}
+          disabled={relayDisabled}
+          className={
+            'flex items-center space-x-2 text-xs uppercase tracking-wider text-slate-500 transition-all py-2 px-6 border border-slate-200 rounded-full hover:shadow-sm bg-white ' +
+            (relayDisabled ? 'opacity-40 cursor-not-allowed' : accentHover)
+          }
+        >
+          {side === 'left' ? (
+            <>
+              <span>{relayLabel}</span>
+              <ArrowLeftRight className="w-3 h-3" />
+            </>
+          ) : (
+            <>
+              <ArrowLeftRight className="w-3 h-3" />
+              <span>{relayLabel}</span>
+            </>
+          )}
+        </button>
+      </div>
+    </section>
   )
 }
 
-function TurnBubble({ turn }) {
+function TurnCard({ turn }) {
   return (
-    <div className="rounded border border-zinc-800 bg-zinc-900/40 p-3">
-      <div className="mb-1 flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-500">
+    <div className="rounded-lg border border-slate-100 bg-white/60 p-4">
+      <div className="mb-2 text-[10px] uppercase tracking-wider text-slate-400 flex items-center gap-2">
         <span>turn {turn.index}</span>
         <span>·</span>
         <span>{ROLE_LABEL[turn.role] || turn.role}</span>
-        {turn.tokens ? <span>· {turn.tokens} tok</span> : null}
+        {turn.tokens ? <><span>·</span><span>{turn.tokens} tok</span></> : null}
       </div>
       {turn.attachments?.length ? (
         <div className="mb-2 flex flex-wrap gap-1">
           {turn.attachments.map((a) => (
-            <span key={a.id} className="inline-flex items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400">
-              <AttachmentIcon kind={a.kind} />{a.name}
+            <span key={a.id} className="inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] text-slate-500">
+              <Paperclip className="w-3 h-3 opacity-60 text-blue-500" />{a.name}
             </span>
           ))}
         </div>
       ) : null}
-      <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-zinc-100">{turn.content}</pre>
+      <pre className="whitespace-pre-wrap font-sans text-sm text-slate-700">{turn.content}</pre>
     </div>
   )
 }
 
-function CenterPane({ className, userTurns, input, setInput, attachments, removeAttachment, dragHover, setDragHover, onDrop, busy, canSend, send, streaming, turns }) {
-  const lastAssistant = useMemo(() => {
-    for (let i = turns.length - 1; i >= 0; i -= 1) {
-      if (turns[i].role === 'claude' || turns[i].role === 'gpt') return turns[i].role
-    }
-    return null
-  }, [turns])
-  const relayTarget = lastAssistant === 'claude' ? 'gpt' : lastAssistant === 'gpt' ? 'claude' : null
-
+function DirectorCanvas({ userTurns, input, setInput, attachments, removeAttachment, isDragging, onDragOver, onDragLeave, onDrop, busy, canSend, hasInput, onSendClaude, onSendGpt }) {
   return (
-    <div className={'flex flex-col overflow-hidden ' + (className || '')}>
-      <div className="border-b border-zinc-800 px-4 py-2 text-xs uppercase tracking-wider text-zinc-500">
-        <span className="font-semibold text-zinc-300">我</span>
-        <span className="ml-2 text-zinc-600">坐在中间审稿</span>
+    <section className="w-1/3 flex flex-col bg-transparent">
+      <div className="px-6 py-4 border-b border-slate-200/60 flex justify-center items-center bg-white/40 backdrop-blur-md">
+        <span className="text-xs uppercase tracking-widest font-medium text-slate-500">Director Canvas</span>
       </div>
-      <div className="scrollbar-thin flex-1 space-y-3 overflow-y-auto px-4 py-3">
+
+      <div className="scrollbar-thin flex-1 overflow-y-auto p-6 space-y-3">
         {userTurns.length === 0 ? (
-          <div className="mt-8 text-center text-xs text-zinc-600">还没发过话。下面输入框写指令、拖文件，按 "Send → claude / gpt"。</div>
-        ) : null}
-        {userTurns.map((t) => <TurnBubble key={`u-${t.index}`} turn={t} />)}
-      </div>
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragHover(true) }}
-        onDragLeave={() => setDragHover(false)}
-        onDrop={onDrop}
-        className={
-          'border-t border-zinc-800 px-4 py-3 ' +
-          (dragHover ? 'bg-emerald-950/30 ring-1 ring-emerald-700/50' : '')
-        }
-      >
-        {attachments.length ? (
-          <div className="mb-2 flex flex-wrap gap-1">
-            {attachments.map((a) => (
-              <span key={a.id} className="inline-flex items-center gap-1 rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">
-                <AttachmentIcon kind={a.kind} />{a.name}
-                <button onClick={() => removeAttachment(a.id)} className="ml-1 text-zinc-500 hover:text-zinc-200"><X size={12} /></button>
-              </span>
-            ))}
+          <div className="mt-12 text-center text-xs text-slate-400">
+            还没发过话。下面写指令、拖文件，按 "To Claude" 或 "To GPT"。
           </div>
         ) : null}
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={canSend ? '在这里写指令；可以把 PDF / 图片 / .md 直接拖进来…' : '先新建或选一个 session'}
-          disabled={!canSend || Boolean(streaming)}
-          rows={4}
-          className="w-full resize-none rounded bg-zinc-900 px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-50"
-          onKeyDown={(e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-              e.preventDefault()
-              send('claude', { withMessage: true })
-            }
-          }}
-        />
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        {userTurns.map((t) => <TurnCard key={`u-${t.index}`} turn={t} />)}
+      </div>
+
+      <div className="p-6 pt-3">
+        <div
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          className={
+            'flex flex-col border rounded-xl bg-white/90 backdrop-blur-xl shadow-sm transition-all duration-300 ' +
+            (isDragging
+              ? 'border-blue-400 ring-4 ring-blue-50 shadow-md'
+              : 'border-slate-200 hover:border-blue-200 hover:shadow-md')
+          }
+        >
+          {attachments.length > 0 ? (
+            <div className="px-4 py-3 border-b border-slate-100 flex flex-wrap gap-2 bg-slate-50/50 rounded-t-xl">
+              {attachments.map((att) => (
+                <span key={att.id} className="inline-flex items-center px-2 py-1 bg-white text-slate-600 text-[10px] uppercase tracking-wider rounded border border-slate-200 shadow-sm">
+                  <Paperclip className="w-3 h-3 mr-1 opacity-60 text-blue-500" />
+                  {att.name}
+                  <button onClick={() => removeAttachment(att.id)} className="ml-2 hover:text-red-500 transition-colors">
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          <textarea
+            className="w-full min-h-[120px] p-5 bg-transparent resize-none focus:outline-none text-sm font-light text-slate-700 placeholder:text-slate-400 leading-relaxed disabled:opacity-60"
+            placeholder={canSend ? 'Draft your instruction... (拖文件 / 图片到这里)' : '先建一个 session'}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={!canSend}
+            onKeyDown={(e) => {
+              if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                e.preventDefault()
+                onSendClaude()
+              }
+            }}
+          />
+        </div>
+
+        <div className="flex justify-between mt-4 gap-3">
           <button
-            onClick={() => send('claude', { withMessage: true })}
-            disabled={!canSend || Boolean(streaming) || (!input.trim() && !attachments.length)}
-            className="flex items-center gap-1 rounded bg-amber-700 px-3 py-1.5 text-amber-50 hover:bg-amber-600 disabled:opacity-40 disabled:hover:bg-amber-700"
+            onClick={onSendClaude}
+            disabled={!canSend || !hasInput}
+            className="group flex-1 flex items-center justify-center space-x-2 py-3 bg-white border border-slate-200 hover:border-indigo-200 text-xs uppercase tracking-widest text-indigo-600 transition-all rounded-xl hover:shadow-sm hover:bg-indigo-50/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:bg-white"
           >
-            <Send size={12} /> Send → Claude
+            <Send className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            <span>To Claude</span>
           </button>
           <button
-            onClick={() => send('gpt', { withMessage: true })}
-            disabled={!canSend || Boolean(streaming) || (!input.trim() && !attachments.length)}
-            className="flex items-center gap-1 rounded bg-emerald-700 px-3 py-1.5 text-emerald-50 hover:bg-emerald-600 disabled:opacity-40 disabled:hover:bg-emerald-700"
+            onClick={onSendGpt}
+            disabled={!canSend || !hasInput}
+            className="group flex-1 flex items-center justify-center space-x-2 py-3 bg-white border border-slate-200 hover:border-sky-200 text-xs uppercase tracking-widest text-sky-600 transition-all rounded-xl hover:shadow-sm hover:bg-sky-50/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:bg-white"
           >
-            <Send size={12} /> Send → GPT
+            <span>To GPT</span>
+            <Send className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </button>
-          <button
-            onClick={() => relayTarget && send(relayTarget, { withMessage: false })}
-            disabled={!canSend || Boolean(streaming) || !relayTarget}
-            className="flex items-center gap-1 rounded border border-zinc-700 px-3 py-1.5 text-zinc-200 hover:bg-zinc-800 disabled:opacity-40"
-            title="把另一方刚才的输出原样转给对面"
-          >
-            <ArrowLeftRight size={12} /> Relay {relayTarget ? `→ ${relayTarget === 'claude' ? 'Claude' : 'GPT'}` : ''}
-          </button>
-          {busy ? <span className="text-zinc-500"><Loader2 size={12} className="inline animate-spin" /> 上传中</span> : null}
-          <span className="flex-1" />
-          <span className="text-zinc-600">⌘/Ctrl + Enter → Claude</span>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400 px-1">
+          <span>⌘/Ctrl + Enter → Claude</span>
+          {busy ? <span className="flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> 上传中</span> : null}
         </div>
       </div>
-    </div>
+    </section>
   )
-}
-
-function AttachmentIcon({ kind }) {
-  if (kind === 'image') return <ImageIcon size={10} />
-  if (kind === 'pdf' || kind === 'text') return <FileText size={10} />
-  return <FileQuestion size={10} />
 }
