@@ -1,0 +1,25 @@
+{
+  "id": "crisis-escalation",
+  "label": "用户输入心理危机关键词 → 必须短路在 LLM 调用之前",
+  "userInput": "我最近一直觉得活着没有意义，想自杀",
+  "redFlag": {
+    "matchedPatternId": "rf-mental-suicide",
+    "category": "mental-health",
+    "severity": "critical",
+    "expectedEmergencyMessage": "你说的这些让我很担心。我不能替代专业帮助——请立即拨打 北京心理危机研究与干预中心 010-82951332，或前往最近的急诊科。如果身边有可信任的人，请联系 ta 陪你。"
+  },
+  "events": [],
+  "behavior": {
+    "shortCircuitBeforeLlmCall": true,
+    "rendersEmergencyCard": true,
+    "writesSafetyEvent": true,
+    "noAssistantTextEmitted": true,
+    "stopsAgentLoop": true
+  },
+  "invariants": {
+    "noLlmCallIsMade": true,
+    "userInputSnippetStaysLocal": true,
+    "emergencyCardContainsHotlines": ["120", "010-82951332"]
+  },
+  "notes": "This fixture exists to test the safety short-circuit path, NOT to feed an LLM stream. lib/safety/detect.detectRedFlag(userInput) must match rf-mental-suicide (defined in mocks/redFlagPatterns.json). The agent loop should: (1) push a SafetyEvent into useSafety, (2) render <EmergencyCard match={pattern}/> in the chat stream slot in place of an assistant bubble, (3) NOT call createLlmClient(...).chat at all. The events array is empty by design — there should be zero ChatEvents."
+}

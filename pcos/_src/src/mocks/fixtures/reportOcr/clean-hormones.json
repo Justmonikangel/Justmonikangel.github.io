@@ -1,0 +1,26 @@
+{
+  "label": "上海某三甲医院妇科激素六项 + 代谢套餐（清晰中文）",
+  "summary": "Adult, monthly cycle ~35d, day 3 draw. Findings consistent with elevated AMH + biochemical hyperandrogenism + insulin resistance. All mandatory exclusions normal.",
+  "cycleDay": 3,
+  "hormones": {
+    "FSH": { "value": 5.2, "unit": "IU/L", "ref": [3, 10], "flag": "normal" },
+    "LH": { "value": 12.4, "unit": "IU/L", "ref": [2, 12], "flag": "borderline" },
+    "E2": { "value": 38, "unit": "pg/mL", "ref": [20, 160], "flag": "normal" },
+    "P": { "value": 0.4, "unit": "ng/mL", "ref": [0.1, 1.5], "flag": "normal" },
+    "T": { "value": 78, "unit": "ng/dL", "ref": [15, 70], "flag": "high" },
+    "freeT": { "value": 3.2, "unit": "pg/mL", "ref": [0.1, 6.4], "flag": "normal" },
+    "DHEAS": { "value": 240, "unit": "μg/dL", "ref": [35, 430], "flag": "normal" },
+    "SHBG": { "value": 32, "unit": "nmol/L", "ref": [30, 90], "flag": "normal" },
+    "AMH": { "value": 7.1, "unit": "ng/mL", "ref": [1.0, 6.8], "flag": "high" },
+    "Prolactin": { "value": 14.2, "unit": "ng/mL", "ref": [4.8, 23.3], "flag": "normal" },
+    "TSH": { "value": 2.1, "unit": "mIU/L", "ref": [0.4, 4.0], "flag": "normal" },
+    "17OHP": { "value": 0.6, "unit": "ng/mL", "ref": [0.2, 1.0], "flag": "normal" }
+  },
+  "metabolic": {
+    "fastingGlucose": { "value": 5.1, "unit": "mmol/L", "ref": [3.9, 6.1], "flag": "normal" },
+    "fastingInsulin": { "value": 14.5, "unit": "μIU/mL", "ref": [2.6, 24.9], "flag": "normal" },
+    "HOMA_IR": { "value": 3.29, "unit": "", "ref": [0, 2.5], "flag": "high" },
+    "HbA1c": { "value": 5.4, "unit": "%", "ref": [4, 6], "flag": "normal" }
+  },
+  "notes": "采血时间 D3 卵泡早期。患者诉月经周期 35–60 天不等近 18 个月。"
+}

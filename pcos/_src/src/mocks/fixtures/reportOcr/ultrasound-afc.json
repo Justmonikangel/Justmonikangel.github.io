@@ -1,0 +1,12 @@
+{
+  "label": "经阴道超声（含 AFC + 卵巢体积 + 内膜）",
+  "summary": "PCOM features bilateral: AFC >= 20 on both ovaries, ovarian volume > 10 mL bilateral. Endometrium thin (consistent with anovulation). Adult population.",
+  "cycleDay": 5,
+  "ultrasound": {
+    "folliclesPerOvary": 28,
+    "ovarianVolumeMl": { "left": 11.2, "right": 12.8 },
+    "endometriumMm": 4.5,
+    "description": "双侧卵巢体积均增大，左侧约 11.2 mL，右侧约 12.8 mL。双侧卵巢可见多枚直径 2–9 mm 卵泡，左侧约 25 枚，右侧约 28 枚，呈周边分布（项链征）。子宫前位，大小形态正常，内膜厚约 4.5 mm，回声欠均。盆腔未见异常游离液。"
+  },
+  "notes": "影像描述符合 2023 国际 PCOS 指南成人 PCOM 标准（AFC ≥ 20 / 卵巢体积 ≥ 10 mL）。本次仅有超声单，未含激素或代谢面板，无法单独构成 PCOS 特征图谱——需要结合其他指标。"
+}

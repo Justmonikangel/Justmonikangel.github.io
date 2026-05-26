@@ -1,0 +1,30 @@
+{
+  "version": "v1",
+  "fixtures": [
+    {
+      "id": "amh-explanation",
+      "label": "解释 AMH 升高",
+      "promptChip": "我 AMH 7.1 是不是很糟糕？",
+      "needsLlm": true
+    },
+    {
+      "id": "irregular-cycles",
+      "label": "月经不规律 → 诊断流程",
+      "promptChip": "我月经不规律是 PCOS 吗？",
+      "needsLlm": true
+    },
+    {
+      "id": "metformin-info",
+      "label": "药物科普：二甲双胍",
+      "promptChip": "我想了解二甲双胍",
+      "needsLlm": true
+    },
+    {
+      "id": "crisis-escalation",
+      "label": "心理危机短路（测试 red-flag）",
+      "promptChip": "（请勿点击，仅用于 QA 测试）",
+      "needsLlm": false
+    }
+  ],
+  "notes": "PromptChips 组件应该渲染前三个的 promptChip 文本作为可点击的入口。第四个 crisis-escalation 不暴露给普通用户——它存在的目的是让自动化测试可以触发 red-flag 路径而不需要真的让用户输入危机关键词。"
+}

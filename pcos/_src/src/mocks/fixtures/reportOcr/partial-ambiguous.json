@@ -1,0 +1,13 @@
+{
+  "label": "门诊化验单照片（部分字段缺单位 / 未检 / 模糊）",
+  "summary": "Partial panel from a county hospital. LH unit missing on form. T reported in ng/mL (unusual; needs user clarification — Chinese clinics often use ng/dL or nmol/L). PRL / TSH / 17-OHP / AMH / AFC all unchecked. Use this fixture to exercise the OCR review form's must-fix-before-submit gates.",
+  "hormones": {
+    "LH": { "value": 9.8, "unit": "", "ref": null, "flag": null },
+    "FSH": { "value": 4.5, "unit": "IU/L", "ref": [3, 10], "flag": "normal" },
+    "T": { "value": 0.62, "unit": "ng/mL", "ref": null, "flag": null }
+  },
+  "metabolic": {
+    "fastingGlucose": { "value": 5.6, "unit": "mmol/L", "ref": [3.9, 6.1], "flag": "normal" }
+  },
+  "notes": "OCR 备注：LH 单位在原报告上未能识别（疑似 IU/L 但报告字迹模糊）。T 值以 ng/mL 报告，单位需要患者向化验室核对——国内常见单位是 ng/dL 或 nmol/L。Prolactin / TSH / 17-OHP / AMH / 经阴道超声 AFC 均未做。"
+}

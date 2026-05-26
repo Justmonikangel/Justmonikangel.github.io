@@ -1,0 +1,32 @@
+{
+  "version": "v1",
+  "fixtures": [
+    {
+      "id": "clean-hormones",
+      "label": "清晰中文激素六项 + 代谢套餐",
+      "filenameHeuristic": ["hormone", "激素"],
+      "expectedFeatureMap": {
+        "summaryContains": "PCOS",
+        "missingExclusions": []
+      }
+    },
+    {
+      "id": "ultrasound-afc",
+      "label": "经阴道超声含 AFC",
+      "filenameHeuristic": ["ultrasound", "超声", "afc", "us"],
+      "expectedFeatureMap": {
+        "summaryContains": "需要结合"
+      }
+    },
+    {
+      "id": "partial-ambiguous",
+      "label": "部分字段缺单位 / 未检 / 模糊",
+      "filenameHeuristic": ["partial", "ambiguous", "模糊"],
+      "expectedFeatureMap": {
+        "summaryContains": "排除性检查未完成"
+      }
+    }
+  ],
+  "default": "clean-hormones",
+  "notes": "Mock client picks a fixture by matching `file.name.toLowerCase()` against any token in filenameHeuristic. If no match, fall back to `default`. To force a specific fixture during demo, name the upload `cyster-fixture-<id>.jpg`."
+}

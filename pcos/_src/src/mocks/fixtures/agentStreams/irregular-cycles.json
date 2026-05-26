@@ -1,0 +1,77 @@
+{
+  "id": "irregular-cycles",
+  "label": "用户问：我月经不规律是 PCOS 吗",
+  "userInput": "我月经不规律是 PCOS 吗",
+  "redFlag": null,
+  "events": [
+    { "type": "text-delta", "delta": "「月经不规律」是 PCOS 三大特征之一，但单独一条不足以下结论。" },
+    { "type": "text-delta", "delta": "我们看看 2023 国际指南是怎么判断的。\n\n" },
+    {
+      "type": "tool-call",
+      "call": {
+        "id": "tc-cyc-1",
+        "name": "search_knowledge",
+        "args": { "query": "2023 诊断" },
+        "status": "running"
+      }
+    },
+    {
+      "type": "tool-result",
+      "id": "tc-cyc-1",
+      "result": [
+        { "id": "pcos-2023-criteria", "slug": "pcos-2023-criteria", "title": "2023 国际 PCOS 指南怎么定义诊断？", "shortAnswer": "成人：三选二（高雄激素 / 排卵障碍 / 多囊卵巢形态或 AMH 升高），且必须先排除其他原因。" }
+      ]
+    },
+    { "type": "text-delta", "delta": "成人路径需要三条特征里满足两条，并且要先排除其他病因：\n" },
+    { "type": "text-delta", "delta": "1. 排卵障碍（月经稀发 / 闭经，你描述的「不规律」属于这一条）\n" },
+    { "type": "text-delta", "delta": "2. 高雄激素：临床（痤疮 / 多毛 / 脱发）或生化（睾酮 / SHBG / 游离雄激素指数）\n" },
+    { "type": "text-delta", "delta": "3. 多囊卵巢形态（AFC ≥ 20 / 单侧 或卵巢体积 ≥ 10 mL）或 AMH 升高\n\n" },
+    { "type": "text-delta", "delta": "强制要排除的：TSH（甲减）、催乳素（高催乳素血症）、17-OHP（CAH）、FSH（POI / 绝经过渡）。\n\n" },
+    { "type": "text-delta", "delta": "你目前只有第 1 条信息。要看其他两条是否成立，建议做：\n" },
+    { "type": "text-delta", "delta": "- 自我观察：是否有持续的痤疮 / 多毛 / 异常脱发 / 体重难降？\n" },
+    { "type": "text-delta", "delta": "- 化验：性激素六项（FSH / LH / E2 / P / T / PRL）+ AMH + DHEAS + SHBG\n" },
+    { "type": "text-delta", "delta": "- 影像：经阴道超声（AFC + 卵巢体积）\n" },
+    { "type": "text-delta", "delta": "- 排除项：TSH / 17-OHP\n\n" },
+    {
+      "type": "tool-call",
+      "call": {
+        "id": "tc-cyc-2",
+        "name": "generate_doctor_questions",
+        "args": { "topic": "irregular-cycles" },
+        "status": "running"
+      }
+    },
+    {
+      "type": "tool-result",
+      "id": "tc-cyc-2",
+      "result": [
+        "我的月经不规律已经持续约 N 个月，请问需要做哪些检查？",
+        "做检查时间需要选在月经周期第几天？",
+        "如果生活方式调整一段时间仍无改善，下一步评估或选择有哪些？",
+        "我现在阶段应该多久复诊一次？"
+      ]
+    },
+    { "type": "text-delta", "delta": "我帮你准备了下次面诊时可以问医生的 4 个问题（你也可以打开「看医生准备」编辑保存）：\n\n" },
+    { "type": "text-delta", "delta": "1. 我的月经不规律已经持续约 X 个月，请问需要做哪些检查？\n" },
+    { "type": "text-delta", "delta": "2. 做检查需要选在月经周期第几天？\n" },
+    { "type": "text-delta", "delta": "3. 如果生活方式调整一段时间仍无明显改善，下一步评估或选择有哪些？\n" },
+    { "type": "text-delta", "delta": "4. 我现在阶段应该多久复诊一次？\n\n" },
+    { "type": "text-delta", "delta": "记得：现在没有结论，只有线索。最终是否符合 PCOS，由医生综合判断。\n\n" },
+    { "type": "text-delta", "delta": "📎 参考：「2023 国际 PCOS 指南怎么定义诊断？」（科普卡片）" },
+    {
+      "type": "done",
+      "usage": {
+        "inputTokens": 920,
+        "outputTokens": 360,
+        "cacheReadInputTokens": 720,
+        "cacheCreationInputTokens": 0
+      }
+    }
+  ],
+  "invariants": {
+    "noConfirmedLanguage": true,
+    "noDoseSuggestion": true,
+    "endsWithDoctorReferral": true,
+    "citesAtLeastOneKnowledgeCard": true
+  }
+}
