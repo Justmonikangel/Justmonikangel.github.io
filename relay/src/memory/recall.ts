@@ -43,7 +43,7 @@ async function renderSemantic(query: string, sessionId: string): Promise<string>
   const cross = await recall(query, { topK: 4 });
   const seen = new Set<string>();
   const all = [...local, ...cross].filter((r) => {
-    const key = JSON.stringify(r.metadata);
+    const key = `${r.text}\n${JSON.stringify(r.metadata)}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

@@ -1,29 +1,35 @@
 import OpenAI from 'openai';
+import type {
+  ResponseCreateParamsStreaming,
+  ResponseStreamEvent,
+} from 'openai/resources/responses/responses';
 import { readFile } from 'node:fs/promises';
 import { config } from '../config.ts';
 import type { Attachment, Turn } from '../types.ts';
 
-const client = new OpenAI({ apiKey: config.openaiApiKey });
+let client: OpenAI | null = null;
 
 export async function* streamGpt(opts: {
   system: string;
   turns: Turn[];
 }): AsyncGenerator<string> {
-  const input: any[] = [
-    { role: 'system', content: opts.system },
-  ];
+  const openai = getClient();
+  const input: any[] = [{ role: 'system', content: opts.system }];
   for (const t of opts.turns) {
     input.push(await toResponsesMessage(t));
   }
-  const stream = await client.responses.create({
+  const stream = await openai.responses.create({
     model: config.gpt.model,
     reasoning: { effort: config.gpt.reasoningEffort },
     input,
     stream: true,
-  } as any);
-  for await (const event of stream as any) {
-    if (event.type === 'response.output_text.delta' && typeof event.delta === 'string') {
-      yield event.delta;
+  } as ResponseCreateParamsStreaming) as unknown as AsyncIterable<ResponseStreamEvent>;
+
+  const emittedByPart = new Map<string, string>();
+  for await (const event of stream) {
+    const chunk = extractDisplayText(event, emittedByPart);
+    if (chunk) {
+      yield chunk;
     }
   }
 }
@@ -63,4 +69,65 @@ async function attachmentToPart(att: Attachment): Promise<any | null> {
     };
   }
   return null;
+}
+
+function extractDisplayText(
+  event: ResponseStreamEvent,
+  emittedByPart: Map<string, string>,
+): string {
+  switch (event.type) {
+    case 'response.output_text.delta': {
+      const key = partKey(event.item_id, event.content_index);
+      emittedByPart.set(key, (emittedByPart.get(key) ?? '') + event.delta);
+      return event.delta;
+    }
+    case 'response.output_text.done': {
+      const key = partKey(event.item_id, event.content_index);
+      return remainderForDone(key, event.text, emittedByPart);
+    }
+    case 'response.refusal.delta': {
+      const key = partKey(event.item_id, event.content_index);
+      emittedByPart.set(key, (emittedByPart.get(key) ?? '') + event.delta);
+      return event.delta;
+    }
+    case 'response.refusal.done': {
+      const key = partKey(event.item_id, event.content_index);
+      return remainderForDone(key, event.refusal, emittedByPart);
+    }
+    case 'response.reasoning_text.delta':
+    case 'response.reasoning_text.done':
+    case 'response.reasoning_summary_text.delta':
+    case 'response.reasoning_summary_text.done':
+      return '';
+    default:
+      return '';
+  }
+}
+
+function remainderForDone(
+  key: string,
+  fullText: string,
+  emittedByPart: Map<string, string>,
+): string {
+  const alreadyEmitted = emittedByPart.get(key) ?? '';
+  emittedByPart.set(key, fullText);
+  if (!alreadyEmitted) return fullText;
+  if (fullText.startsWith(alreadyEmitted)) {
+    return fullText.slice(alreadyEmitted.length);
+  }
+  return '';
+}
+
+function partKey(itemId: string, contentIndex: number): string {
+  return `${itemId}:${contentIndex}`;
+}
+
+function getClient(): OpenAI {
+  if (!config.openaiApiKey) {
+    throw new Error('OPENAI_API_KEY is not configured');
+  }
+  if (!client) {
+    client = new OpenAI({ apiKey: config.openaiApiKey });
+  }
+  return client;
 }

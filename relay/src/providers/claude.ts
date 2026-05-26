@@ -3,14 +3,15 @@ import { readFile } from 'node:fs/promises';
 import { config } from '../config.ts';
 import type { Attachment, Turn } from '../types.ts';
 
-const client = new Anthropic({ apiKey: config.anthropicApiKey });
+let client: Anthropic | null = null;
 
 export async function* streamClaude(opts: {
   system: string;
   turns: Turn[];
 }): AsyncGenerator<string> {
+  const anthropic = getClient();
   const messages = await Promise.all(opts.turns.map(toAnthropicMessage));
-  const stream = client.messages.stream({
+  const stream = anthropic.messages.stream({
     model: config.claude.model,
     max_tokens: config.claude.maxTokens,
     system: opts.system,
@@ -28,6 +29,16 @@ export async function* streamClaude(opts: {
       yield event.delta.text;
     }
   }
+}
+
+function getClient(): Anthropic {
+  if (!config.anthropicApiKey) {
+    throw new Error('ANTHROPIC_API_KEY is not configured');
+  }
+  if (!client) {
+    client = new Anthropic({ apiKey: config.anthropicApiKey });
+  }
+  return client;
 }
 
 async function toAnthropicMessage(turn: Turn): Promise<Anthropic.MessageParam> {

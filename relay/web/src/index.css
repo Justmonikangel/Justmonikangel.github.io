@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(63 63 70); border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+.streaming-cursor::after {
+  content: '▍';
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+  color: rgb(161 161 170);
+}
+@keyframes blink {
+  to { visibility: hidden; }
+}

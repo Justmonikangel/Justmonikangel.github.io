@@ -7,6 +7,7 @@ import { maybeCompact } from './compaction.ts';
 import { loadSkills } from '../skills/loader.ts';
 import { estimateTokens } from '../lib/tokens.ts';
 import { readManifest } from '../lib/sessions.ts';
+import { config } from '../config.ts';
 import type { Attachment, ProviderTarget, Turn } from '../types.ts';
 
 export async function* runTurn(opts: {
@@ -14,6 +15,8 @@ export async function* runTurn(opts: {
   target: ProviderTarget;
   userMessage?: { content: string; attachments: Attachment[] };
 }): AsyncGenerator<string> {
+  const targetModel = modelForTarget(opts.target);
+
   if (opts.userMessage) {
     const stamped = await appendTurn(opts.sessionId, {
       index: 0,
@@ -21,7 +24,8 @@ export async function* runTurn(opts: {
       content: opts.userMessage.content,
       attachments: opts.userMessage.attachments,
       createdAt: new Date().toISOString(),
-      tokens: estimateTokens(opts.userMessage.content),
+      tokens: estimateTokens(opts.userMessage.content, targetModel),
+      model: targetModel,
     });
     void ingestTurn(opts.sessionId, stamped);
   }
@@ -50,8 +54,8 @@ export async function* runTurn(opts: {
     content: assistantText,
     attachments: [],
     createdAt: new Date().toISOString(),
-    tokens: estimateTokens(assistantText),
-    model: opts.target === 'claude' ? 'claude' : 'gpt',
+    tokens: estimateTokens(assistantText, targetModel),
+    model: targetModel,
   });
   void ingestTurn(opts.sessionId, stamped);
 }
@@ -91,4 +95,8 @@ function composeSystem(
   if (semantic) parts.push(`# Relevant memories / 相关记忆\n\n${semantic}`);
   if (skills) parts.push(`# Skills\n\n${skills}`);
   return parts.join('\n\n');
+}
+
+function modelForTarget(target: ProviderTarget): string {
+  return target === 'claude' ? config.claude.model : config.gpt.model;
 }
