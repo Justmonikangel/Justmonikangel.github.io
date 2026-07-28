@@ -33,3 +33,6 @@ Temporary Items
 
 # debug file
 _site
+# Python
+__pycache__/
+*.py[cod]

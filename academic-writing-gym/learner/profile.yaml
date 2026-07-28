@@ -1,0 +1,55 @@
+# Learner profile. Read by the agent at the start of every session;
+# the `focus:` list is read by `awgym seed`.
+
+name: Jolyne
+field: molecular microbiology / structural bioinformatics
+target_genres:
+  - research article (Results, Discussion)
+  - abstract
+  - fellowship and grant summaries
+first_language: Chinese
+english_level: high — grammar is not the bottleneck
+
+# The one-line diagnosis this whole system is built around.
+core_pattern: >
+  Reasoning is sound and fast; the prose compresses it. Intermediate
+  inferential steps are performed mentally and never written down, so
+  paragraphs read as unsupported to anyone who does not already share
+  the author's model. The failure is compression, not confusion.
+
+strengths:
+  - connects distant concepts
+  - generates hypotheses quickly
+  - comfortable with mechanism
+  - strong pattern recognition across literature
+
+# Seeded into learner/errors/ by `awgym seed`. Ordered by how much
+# damage each one does to this writer's manuscripts specifically.
+focus:
+  - gap.warrant
+  - gap.mechanism
+  - gap.scale
+  - gap.quantifier
+  - claim.hedge_drift
+  - claim.overclaim
+  - claim.causal
+  - boundary.interp_in_results
+  - boundary.no_alternative
+  - cohesion.referent
+
+# Patterns explicitly NOT worth session time right now. The agent should
+# not spend a critical-issue slot on these.
+deprioritised:
+  - sentence.nominalisation
+  - sentence.noun_chain
+
+default_mode: training      # training | deadline | manuscript
+curriculum_week: 1
+session_length_minutes: 30
+
+# Hard limits the agent must respect. See references/hint-ladder.md.
+constraints:
+  max_critical_issues: 1
+  max_secondary_issues: 2
+  reveal_reference_revision_only_after_v2: true
+  never_rewrite_in_training_mode: true
